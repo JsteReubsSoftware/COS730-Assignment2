@@ -1,12 +1,12 @@
-name: Build Project
+name: Deploy
 
 on:
   push:
     branches:
-      - '**/*_dev'
+      - main
   pull_request:
     branches:
-      - '**/*_dev'
+      - main
 
 jobs:
   all_dev:
@@ -14,5 +14,4 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - run: echo "${{ secrets.DOTENVFILE }}" > .env
-      - run: 'npm install'
-      - run: 'npm run build'
+      - run: 'npm run deploy -- -m "Deploy React app to GitHub Pages"
