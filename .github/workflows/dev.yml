@@ -3,10 +3,10 @@ name: Build and Deploy
 on:
   push:
     branches:
-      - '*_dev'
+      - '**/*_dev'
   pull_request:
     branches:
-      - '*_dev'
+      - '**/*_dev'
 
 jobs:
   all_dev:
