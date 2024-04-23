@@ -1,16 +1,16 @@
 {
   "files": {
-    "main.css": "/COS730-Assignment2/automated-apis-app/static/css/main.f855e6bc.css",
-    "main.js": "/COS730-Assignment2/automated-apis-app/static/js/main.91ef387e.js",
-    "static/js/453.d4bc46f5.chunk.js": "/COS730-Assignment2/automated-apis-app/static/js/453.d4bc46f5.chunk.js",
-    "static/media/logo.svg": "/COS730-Assignment2/automated-apis-app/static/media/logo.6ce24c58023cc2f8fd88fe9d219db6c6.svg",
-    "index.html": "/COS730-Assignment2/automated-apis-app/index.html",
-    "main.f855e6bc.css.map": "/COS730-Assignment2/automated-apis-app/static/css/main.f855e6bc.css.map",
-    "main.91ef387e.js.map": "/COS730-Assignment2/automated-apis-app/static/js/main.91ef387e.js.map",
-    "453.d4bc46f5.chunk.js.map": "/COS730-Assignment2/automated-apis-app/static/js/453.d4bc46f5.chunk.js.map"
+    "main.css": "/COS730-Assignment2/static/css/main.f855e6bc.css",
+    "main.js": "/COS730-Assignment2/static/js/main.714be7c5.js",
+    "static/js/453.d4bc46f5.chunk.js": "/COS730-Assignment2/static/js/453.d4bc46f5.chunk.js",
+    "static/media/logo.svg": "/COS730-Assignment2/static/media/logo.6ce24c58023cc2f8fd88fe9d219db6c6.svg",
+    "index.html": "/COS730-Assignment2/index.html",
+    "main.f855e6bc.css.map": "/COS730-Assignment2/static/css/main.f855e6bc.css.map",
+    "main.714be7c5.js.map": "/COS730-Assignment2/static/js/main.714be7c5.js.map",
+    "453.d4bc46f5.chunk.js.map": "/COS730-Assignment2/static/js/453.d4bc46f5.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.f855e6bc.css",
-    "static/js/main.91ef387e.js"
+    "static/js/main.714be7c5.js"
   ]
 }
