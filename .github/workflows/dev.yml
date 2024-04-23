@@ -2,9 +2,11 @@ name: Build and Deploy
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - '*_dev'
   pull_request:
-    branches: [ main ]
+    branches:
+      - '*_dev'
 
 jobs:
   all_dev:
