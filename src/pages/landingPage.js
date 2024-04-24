@@ -3,7 +3,7 @@ import { useGoogleLogin, googleLogout } from '@react-oauth/google';
 // import { jwtDecode } from 'jwt-decode';
 import axios from "axios";
 
-const HomePage = () => {
+const LandingPage = () => {
   const [ user, setUser ] = useState(() => {
     return localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : null;
   });
@@ -15,6 +15,7 @@ const HomePage = () => {
     onSuccess: (credentialResponse) => {
       setUser(credentialResponse);
       localStorage.setItem('user', JSON.stringify(credentialResponse));
+      navigate();
     },
     onError: (error) => {
       console.log('Login Failed:', error);
@@ -41,11 +42,14 @@ const HomePage = () => {
         .then((res) => {
             setProfile(res.data);
             localStorage.setItem('profile', JSON.stringify(res.data));
-            console.log(res.data);
         })
         .catch((err) => console.log(err));
       }
     },[ user ]);
+
+    const navigate = () => {
+      return window.location.href = '/contacts';
+    };
 
     return (
       <div>
@@ -60,6 +64,7 @@ const HomePage = () => {
             <p>Email Address: {profile.email}</p>
             <br />
             <br />
+            <button onClick={navigate}>Go to Home Page</button>
             <button onClick={logout}>Log out</button>
           </div>
         ) : (
@@ -69,4 +74,4 @@ const HomePage = () => {
   );
 };
 
-export default HomePage;
+export default LandingPage;
