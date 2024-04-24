@@ -11,9 +11,7 @@ app.get('/', (req, res) => {
     res.send('Hello Node API !')
 })
 
-const DB_USERNAME = process.env.MONGO_ATLAS_USERNAME
-const DB_PASSWORD = process.env.MONGO_ATLAS_PASSWORD
-const DB_CONNECTION_URL = process.env.MONGO_ATLAS_CONNECTION_URL
+const DB_CONNECTION_URL = process.env.REACT_APP_MONGO_ATLAS_CONNECTION_URL
 
 mongoose.set("strictQuery", false);
 mongoose.connect(`${DB_CONNECTION_URL}`).then(() => {
