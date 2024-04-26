@@ -1,24 +1,15 @@
 const express = require('express')
 const mongoose = require('mongoose')
-// const jwt = require('jsonwebtoken')
 const cors = require('cors')
 const app = express()
-
-// import models
-// const Users = require('../models/userModel')
 
 app.use(cors())
 app.use(express.json())
 app.use(express.urlencoded({extended: false}))
 
-// const secretKey = process.env.REACT_APP_JWT_SECRET_KEY;
-// const expireTime = process.env.REACT_APP_JWT_EXPIRE_TIME;
-
 // routes
-
-app.get('/', (req, res) => {
-    res.send('Hello Node API !')
-})
+app.use("/api", require("./routes/loginRoutes"))
+app.use("/api", require("./routes/userRoutes"))
 
 // ------------------ API endpoints ------------------
 
@@ -88,14 +79,14 @@ app.get('/', (req, res) => {
 // ---------------------------------------------------
 
 // Setup DB connection and server
-
+const PORT = process.env.REACT_APP_PORT || 3000;
 const DB_CONNECTION_URL = process.env.REACT_APP_MONGO_ATLAS_CONNECTION_URL
 
 mongoose.set("strictQuery", false);
 mongoose.connect(`${DB_CONNECTION_URL}`).then(() => {
     console.log('Connected to MongoDB')
-    app.listen(3000, () => {
-        console.log('Node API app running on port 3000')
+    app.listen(PORT, () => {
+        console.log(`Node API app running on port ${PORT}`)
     })
 }).catch((error) => {
     console.log(error)
