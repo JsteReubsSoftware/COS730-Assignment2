@@ -15,6 +15,9 @@ const LandingPage = () => {
     onSuccess: (credentialResponse) => {
       setUser(credentialResponse);
       localStorage.setItem('user', JSON.stringify(credentialResponse));
+      localStorage.setItem('profile', JSON.stringify(credentialResponse)); 
+      // add JWT to storage
+      console.log(credentialResponse);
       navigate();
     },
     onError: (error) => {
@@ -31,7 +34,18 @@ const LandingPage = () => {
   };
 
     useEffect(() => {
+      if (user && user.expires_at) {
+        const now = new Date().getTime() / 1000;
+        if (now > user.expires_at) {
+          setUser(null);
+          setProfile(null);
+          localStorage.clear();
+        }
+      }
+
       if (user) {
+        const now = new Date().getTime() / 1000;
+        console.log(now > user.expires_at);
         axios
         .get(`https://www.googleapis.com/oauth2/v1/userinfo?access_token=${user.access_token}`, {
             headers: {
@@ -48,7 +62,16 @@ const LandingPage = () => {
     },[ user ]);
 
     const navigate = () => {
-      return window.location.href = '/contacts';
+      // if we are logged in, check if our JWT has not expired
+      if (user && user.expires_at) {
+        const now = new Date().getTime() / 1000;
+        if (now > user.expires_at) {
+          logout();
+        }
+      }
+      else{
+        return window.location.href = '/contacts';
+      }
     };
 
     return (
