@@ -1,10 +1,11 @@
 import { MdAddBox } from "react-icons/md";
 import { IoFilter } from "react-icons/io5";
+import ContactCard from "../components/contactCard";
 
 const ContactsPage = () => {
     return (
         <div className="h-screen w-full bg-smoothWhite"> {/* add grids if the screen size is desktop */}
-            <div className="w-full h-full bg-transparent flex flex-col p-1">
+            <div className="w-full h-[110px] bg-transparent flex flex-col p-1">
                 <div className="flex">
                     <img src={require("../assets/smile-emoji.png")} width='50px' alt="smile emoji"/>
                     <span className="my-auto ml-2 font-irishGrover">Yahoo! Messenger</span>
@@ -20,6 +21,12 @@ const ContactsPage = () => {
                         </div> 
                     </div>
                 </div>
+            </div>
+            <div className="w-full h-[641px] pb-5 overflow-auto flex flex-col">
+                {
+                    // render the contact cards
+                    Array.from({ length: 20 }).map((_, index) => <ContactCard key={index} />)
+                }
             </div>
             {/* render the contact view page if the screen size allows it */}
         </div>
