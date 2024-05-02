@@ -12,6 +12,9 @@ module.exports = {
         smoothWhite: "#F1F1F1",
         smoothGrey: "#999999"
       },
+      fontFamily: {
+        'irishGrover': ['Irish Grover', 'serif'],
+      }
     },
   },
   plugins: [],
