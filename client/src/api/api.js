@@ -27,13 +27,15 @@ export const logInGoogle = async (access_token) => {
     return res.data.data;
 }
 
-export const getUser = async (token) => {
+export const getUser = async (token, email) => {
     const validToken = await validateToken(token);
     if (!validToken.data.data.valid) {
         return null;
     }
 
-    const response = await API.post('/api/getuser');
+    const response = await API.post('/api/getuser', {
+        email
+    });
     return response.data.data;
 }
 

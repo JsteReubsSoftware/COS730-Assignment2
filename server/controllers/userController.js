@@ -7,12 +7,12 @@ const getUser = async (req, res) => {
     const count = await User.countDocuments();
 
     if (count === 0) {
-        return res.status(200).json({message: "No users found."});
+        return res.status(200).json({success: true, data: {message: "No users found."}});
     }
 
     const user = await User.findOne({email: req.body.email});
 
-    return res.status(200).json(user)
+    return res.status(200).json({succes: true, data: { user }});
 }
 
 module.exports = {
