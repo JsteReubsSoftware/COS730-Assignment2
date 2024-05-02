@@ -4,7 +4,7 @@ const Messages = require("../models/messageModel")
 
 const sendMessage = async (req, res) => {
     try {
-        const { senderId, receiverId, text } = req.body
+        const { text, senderId, receiverId } = req.body
         const newMessage = await Messages.create({
             text: text,
             senderId: senderId,

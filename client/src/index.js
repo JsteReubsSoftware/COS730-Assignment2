@@ -2,11 +2,8 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
-import io from "socket.io-client";
 import './index.css';
-
-//eslint-disable-next-line
-const socket = io.connect(`http://localhost:${process.env.REACT_APP_SERVER_PORT}`);
+import './socket';
 
 
 const root = ReactDOM.createRoot(document.getElementById('root'));

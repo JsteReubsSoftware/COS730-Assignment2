@@ -16,7 +16,8 @@ app.use(express.urlencoded({extended: false}))
 
 // routes
 app.use("/api", require("./routes/loginRoutes"))
-app.use("/api", require("./routes/userRoutes"))  
+app.use("/api", require("./routes/userRoutes")) 
+app.use("/api", require("./routes/messageRoutes"))
 
 // ---------------------------------------------------
 

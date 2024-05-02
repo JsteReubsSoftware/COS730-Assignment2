@@ -33,7 +33,7 @@ const loginController = async(req, res) => {
                     id: newUser._id
                 }, process.env.REACT_APP_JWT_SECRET_KEY, {expiresIn: process.env.REACT_APP_JWT_EXPIRE_TIME});
 
-                res.status(200).json({result: newUser, token});
+                res.status(200).json({success: true, data: {result: newUser, token}});
             }
             else {
                 const existingUser = await User.findOne({email})
@@ -53,14 +53,14 @@ const loginController = async(req, res) => {
                     id: existingUser._id
                 }, process.env.REACT_APP_JWT_SECRET_KEY, {expiresIn: process.env.REACT_APP_JWT_EXPIRE_TIME})
         
-                res.status(200).json({result: existingUser, token})
+                res.status(200).json({success: true, data: {result: existingUser, token}})
             }                
         })
         .catch(err => {
-            res.status(400).json({message: "Invalid access token!", error: err})
+            res.status(400).json({success: false, data: {message: "Invalid access token!", error: err}})
         })
     }else{
-        res.status(401).json({message: "Unauthorized access! No access token provided."})
+        res.status(401).json({success: false, data: {message: "Unauthorized access! No access token provided."}})
     }
   
 }
@@ -69,18 +69,18 @@ const verifyToken = async (req, res) => {
     const token = req.body.token;
 
     if (!token) {
-        return res.json({valid: false, message: "Unauthorized access! No token provided."});
+        return res.json({success: true, data: {valid: false, message: "Unauthorized access! No token provided."}});
     }
 
     jwt.verify(token, process.env.REACT_APP_JWT_SECRET_KEY, (err) => {
         if (err && err.name === "TokenExpiredError") {
-            return res.json({valid: false, message: "Token expired.", error: err});
+            return res.json({success: true, data: {valid: false, message: "Token expired.", error: err}});
         }
         else if (err) {
-            return res.json({valid: false, message: "Invalid token.", error: err});
+            return res.json({success: true, data: {valid: false, message: "Invalid token.", error: err}});
         }
 
-        return res.json({valid: true, message: "Token is valid."});
+        return res.json({success: true, data: {valid: true, message: "Token is valid."}});
     });
 }
 
