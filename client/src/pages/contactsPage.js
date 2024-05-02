@@ -1,6 +1,8 @@
 const ContactsPage = () => {
     return (
-        <div>Contacts Page</div>
+        <div className="h-screen w-full bg-smoothWhite">
+            <div>Contacts Page</div>
+        </div>
     )
 };
 
