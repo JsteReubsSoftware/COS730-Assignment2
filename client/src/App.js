@@ -7,14 +7,20 @@ import BottomNavBar from './components/bottomNavBar';
 
 function App() {
   const [selectedTab, setSelectedTab] = useState("contacts");
+  const [showBottomNavBar, setShowBottomNavBar] = useState(false);
 
   useEffect(() => {
     if (window.location.pathname === "/contacts") {
       setSelectedTab("contacts");
+      setShowBottomNavBar(true);
     } else if (window.location.pathname === "/chatroom") {
       setSelectedTab("chatroom");
+      setShowBottomNavBar(true);
     } else if (window.location.pathname === "/profile") {
       setSelectedTab("profile");
+      setShowBottomNavBar(true);
+    } else {
+      setShowBottomNavBar(false);
     }
   }, []);
 
@@ -22,7 +28,7 @@ function App() {
     <div className="App">
       <GoogleOAuthProvider clientId={process.env.REACT_APP_OAUTH_CLIENT_ID}>
         <AppRoutes />
-        <BottomNavBar currentTab={selectedTab}/>
+        {showBottomNavBar && <BottomNavBar currentTab={selectedTab}/>}
       </GoogleOAuthProvider>
     </div>
   );

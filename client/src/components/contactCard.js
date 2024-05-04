@@ -4,7 +4,7 @@ const ContactCard = () => {
 
     return (
         <div className=" h-[90px] border-b-2 border-b-whitePurple mx-2 grid grid-cols-10 gap-1">
-            <div className="col-start-1 col-span-2 py-2 pl-1">
+            <div className="col-start-1 col-span-2 py-1 pl-1">
                 <img src={require("../assets/profile-pic.jpg")} alt="profile" className="rounded-full w-full h-full "/>
             </div>
             <div className="col-start-3 col-span-5 flex flex-col pl-3 justify-evenly">
