@@ -4,9 +4,22 @@ const mongoose = require('mongoose')
 const cors = require('cors')
 const app = express()
 const chatServer = http.createServer(app)
+
+const allowedOrigins = [
+    'https://rj-automated-api-app.onrender.com',
+    `http://localhost:${process.env.REACT_APP_CLIENT_PORT}`,
+    `http://127.0.0.1:${process.env.REACT_APP_CLIENT_PORT}`
+]
+
 const io = require('socket.io')(chatServer, {
     cors: {
-        origin: [`http://localhost:${process.env.REACT_APP_CLIENT_PORT}`, `http://127.0.0.1:${process.env.REACT_APP_CLIENT_PORT}`]
+        origin: (origin, callback) => {
+            if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
+                callback(null, true)
+            } else {
+                callback(new Error('Not allowed by CORS'))
+            }
+        }
     }
 })
 
