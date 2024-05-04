@@ -5,14 +5,12 @@ on:
     branches:
       - main
   pull_request:
-    branches:
-      - main
+    types:
+      - closed
 
 jobs:
   all_dev:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - run: echo "${{ secrets.DOTENVFILE }}" > .env
-      - run: 'npm i env-cmd'
       - run: 'cd client && npm run deploy -- -m "Deploy React app to GitHub Pages"'
