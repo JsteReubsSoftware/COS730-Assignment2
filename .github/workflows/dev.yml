@@ -4,9 +4,11 @@ on:
   push:
     branches:
       - '**/*_dev'
+      - 'dev'
   pull_request:
     branches:
       - '**/*_dev'
+      - 'dev'
 
 jobs:
   all_dev:
