@@ -18,7 +18,7 @@ const BottomNavBar = ({ currentTab }) => {
     }
 
     return (
-        <div className="bg-smoothWhite h-[70px] w-full absolute bottom-0 grid grid-rows-1 grid-cols-3">
+        <div className="bg-smoothWhite opacity-50 h-[70px] w-full absolute bottom-0 grid grid-rows-1 grid-cols-3">
             <div 
                 className={`transition duration-75 col-start-1 col-span-1 border-b-[6px] ${currentTab === 'chatroom' ? 'border-b-darkPurple' : 'border-b-smoothWhite'} border-t-2 border-darkPurple`}
                 onClick={navigate("chatroom")}

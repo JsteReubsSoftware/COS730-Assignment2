@@ -31,6 +31,8 @@ module.exports = {
       gridRow: {
         'span-34': 'span 34 / span 34',
         'span-29': 'span 29 / span 29',
+        'span-22': 'span 22 / span 22',
+        'span-23': 'span 23 / span 23',
         'span-24': 'span 24 / span 24',
         'span-25': 'span 25 / span 25',
         'span-26': 'span 26 / span 26',
