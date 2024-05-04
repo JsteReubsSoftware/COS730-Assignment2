@@ -1,6 +1,8 @@
 const ChatRoomPage = () => {
     return (
-        <div>ChatRoom Page</div>
+        <div className="h-screen w-full bg-smoothWhite">
+            <div>chatroom Page</div>
+        </div>
     )
 };
 
