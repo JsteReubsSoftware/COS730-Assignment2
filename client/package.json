@@ -30,7 +30,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "build": "react-scripts build && mv build ../",
     "test": "env-cmd -f ../.env react-scripts test",
     "eject": "env-cmd -f ../.env react-scripts eject",
     "predeploy": "npm run build",
