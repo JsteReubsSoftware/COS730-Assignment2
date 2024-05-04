@@ -35,8 +35,8 @@
     "eject": "env-cmd -f ../.env react-scripts eject",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d build",
-    "client": "set PORT=5000 && env-cmd -f ../.env react-scripts start",
-    "server": "env-cmd -f ../.env nodemon -r dotenv/config ../server/server.js",
+    "client": "set PORT=5000 && react-scripts start",
+    "server": "nodemon -r dotenv/config ../server/server.js",
     "dev": "concurrently \"yarn run client\" \"yarn run server\""
   },
   "eslintConfig": {
