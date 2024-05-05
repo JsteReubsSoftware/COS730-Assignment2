@@ -1,7 +1,7 @@
 import axios from "axios"
 
-// const API = axios.create({baseURL:"http://localhost:3000"})
-const API = axios.create({baseURL:"https://rj-automated-api.onrender.com"})
+const API = axios.create({baseURL:"http://localhost:3000"})
+// const API = axios.create({baseURL:"https://rj-automated-api.onrender.com"})
 
 API.interceptors.request.use((req)=>{
     if(localStorage.getItem("user_info")){
@@ -28,16 +28,39 @@ export const logInGoogle = async (access_token) => {
     return res.data.data;
 }
 
-export const getUser = async (token, email) => {
+export const getVerifiedUser = async (token) => {
     const validToken = await validateToken(token);
-    if (!validToken.data.data.valid) {
+    if (!validToken.valid) {
         return null;
     }
 
-    const response = await API.post('/api/getuser', {
+    return validToken.user;
+}
+
+export const getUserByEmail = async (token) => {
+    const validToken = await validateToken(token);
+    if (!validToken.valid) {
+        return null;
+    }
+    const email = validToken.user.email;
+    const params = new URLSearchParams({ email });
+    
+    const response = await API.get('/api/getUserByEmail?' + params.toString());
+    return response.data.data;
+}
+
+export const updateUserLanguage = async (token, language, email) => {
+    const validToken = await validateToken(token);
+    if (!validToken.valid) {
+        return null;
+    }
+
+    const response = await API.put('/api/updateUserLanguage', {
+        language,
         email
     });
-    return response.data.data;
+
+    return response.data;
 }
 
 // ======== Message Service Endpoints =========

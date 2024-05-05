@@ -1,9 +1,11 @@
 const express = require("express")
 
-const { getUser } = require("../controllers/userController")
+const { getUserByEmail, updateUserLanguage } = require("../controllers/userController")
 
 const router = express.Router()
 
-router.get("/getUser", getUser)
+router.get("/getUserByEmail", getUserByEmail)
+
+router.put("/updateUserLanguage", updateUserLanguage)
 
 module.exports = router;

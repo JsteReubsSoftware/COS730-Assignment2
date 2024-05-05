@@ -2,19 +2,51 @@ const jwt = require("jsonwebtoken")
 const axios = require("axios")
 const User = require("../models/userModel")
 
-const getUser = async (req, res) => {
-    // check if collection contains any documents
-    const count = await User.countDocuments();
+const getUserByEmail = async (req, res) => {
+    try {
+        const email = req.query.email;
 
-    if (count === 0) {
-        return res.status(200).json({success: true, data: {message: "No users found."}});
+        if (!email) {
+            return res.status(200).json({success: true, data: { user: null, message: "No email provided." }});
+        }
+
+        // check if collection contains any documents
+        const count = await User.countDocuments();
+
+        if (count === 0) {
+            return res.status(200).json({success: true, data: { user: null, message: "No users found." }});
+        }
+
+        const user = await User.findOne({email: email});
+
+        if (!user) {
+            return res.status(200).json({success: true, data: { user: null, message: "User not found." }});
+        }
+
+        return res.status(200).json({success: true, data: { user: user, message: "User found." }});
+    } catch(error) {
+        return res.status(500).json({success: false, data: {message: error.message}});
     }
+}
 
-    const user = await User.findOne({email: req.body.email});
+const updateUserLanguage = async (req, res) => {
+    try {
+        const { language, email } = req.body;
 
-    return res.status(200).json({succes: true, data: { user }});
+        const count = await User.countDocuments();
+
+        if (count === 0) {
+            return res.status(404).json({success: false, data: {message: "Unable to update language. No users found."}});
+        }
+
+        const user = await User.findOneAndUpdate({email: email}, {language: language}, {new: true});
+        return res.status(200).json({success: true, data: {user}});
+    } catch(error) {
+        return res.status(500).json({success: false, data: {message: error.message}});
+    }
 }
 
 module.exports = {
-    getUser
+    getUserByEmail,
+    updateUserLanguage
 }
