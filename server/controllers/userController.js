@@ -63,8 +63,26 @@ const updateUserBlurText = async (req, res) => {
     }
 }
 
+const updateUsername = async (req, res) => {
+    try {
+        const { username, email } = req.body;
+        
+        const count = await User.countDocuments();
+
+        if (count === 0) {
+            return res.status(404).json({success: false, data: {message: "Unable to update censoreText field. No users found."}});
+        }
+
+        const user = await User.findOneAndUpdate({email: email}, {name: username}, {new: true});
+        return res.status(200).json({success: true, data: {user}});
+    } catch(error) {
+        return res.status(500).json({success: false, data: {message: error.message}});
+    }
+}
+
 module.exports = {
     getUserByEmail,
     updateUserLanguage,
-    updateUserBlurText
+    updateUserBlurText,
+    updateUsername
 }

@@ -2,6 +2,8 @@ import { FaRegEdit } from "react-icons/fa";
 import { BiLogOut } from "react-icons/bi";
 import { RiDeleteBinLine } from "react-icons/ri";
 import { ImSpinner10 } from "react-icons/im";
+import { MdOutlineClose, MdDone } from "react-icons/md";
+
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -17,6 +19,9 @@ import * as API from "../api/api";
 const ProfilePage = () => {
     const [language, setLanguage] = useState(null);
     const [blurText, setBlurText] = useState(false);
+    const [username, setUsername] = useState(null);
+    const [prevUsername, setPrevUsername] = useState(null);
+    const [editingUsername, setEditingUsername] = useState(false);
     
     const options = Object.keys(LANGUAGES).map((key) => ({ value: key, label: LANGUAGES[key][0].toUpperCase() + LANGUAGES[key].slice(1) }));
 
@@ -75,6 +80,25 @@ const ProfilePage = () => {
         }
     }
 
+    const handleUpdateUsername = async () => {
+        const userRes = await API.getUserByEmail(Cookies.get('jwt'));
+
+        if (userRes.user) {
+            const res = await API.updateUsername(Cookies.get('jwt'), username, userRes.user.email);
+
+            if (res && res.success) {
+                setEditingUsername(false);
+                setUsername(res.data.user.name);
+                setPrevUsername(res.data.user.name);
+                notify('Username Updated');
+            }
+            else {
+                setEditingUsername(false);
+                notify('Something went wrong. Please try again.');
+            }
+        }
+    }
+
     useEffect(() => {
         if (Cookies.get('jwt')) {
             const getStates = async () => {
@@ -83,6 +107,8 @@ const ProfilePage = () => {
                 if (res.user) {
                   setLanguage(res.user.language);
                   setBlurText(res.user.censoreText);
+                  setUsername(res.user.name);
+                  setPrevUsername(res.user.name);
                 }
             };
     
@@ -92,6 +118,35 @@ const ProfilePage = () => {
             window.location.href = "/landing";
         }
     }, [])
+
+    useEffect(() => {
+        // Add event listener for clicks
+        const handleOutsideClick = (event) => {
+            const inputElement = document.getElementById("username-input");
+            const editUsernameBTN = document.getElementById("edit-username-btn");
+
+            // Check if clicked outside the input element
+            if (!event.target.matches('#username-input') && !inputElement?.contains(event.target) && editingUsername) {
+                inputElement.blur();
+                setEditingUsername(false);
+                setUsername(prevUsername);
+            }
+
+            // if we clicked on the edit button we are allowed to edit the username
+            else if (event.target === editUsernameBTN) {
+                setEditingUsername(true);
+            }
+        };
+
+        document.addEventListener('click', handleOutsideClick);
+
+        // Cleanup function to remove event listener on unmount
+        return () => {
+            document.removeEventListener('click', handleOutsideClick);
+        };
+
+    });
+      
 
     const getDefaultValue = () => {
         return options.filter((option) => option.value === language)[0];
@@ -109,19 +164,27 @@ const ProfilePage = () => {
                     <img src={require("../assets/smile-emoji.png")} width='50px' alt="smile emoji"/>
                     <span className="my-auto ml-2 font-irishGrover">Yahoo! Messenger</span>
                 </div>
-                <div className="m-auto my-4 flex flex-col justify-center">
-                    <img src={require("../assets/profile-pic.jpg")} width='150px' alt="profile" className="rounded-full"/>
-                    <span className="text-center mt-2 text-2xl font-bold">Username</span>
+                <div className="m-auto my-4 flex flex-col justify-center w-full">
+                    <img src={require("../assets/profile-pic.jpg")} width='150px' alt="profile" className="rounded-full self-center"/>
+                    <span className="self-center text-center mt-2 text-2xl font-bold w-[400px]">{username.length > 20 ? username.slice(0, 20) + "..." : username}</span>
                 </div>
             </div>
             <div className="row-start-12 row-span-22">
                 <label className="text-darkPurple text-xl font-bold m-2 pl-2">Profile Settings</label>
-                <div className="mx-10 my-4 flex flex-col ">
+                <div className={`${!editingUsername ? "mx-10" : "ml-10 mr-3"} my-4 flex flex-col`}>
                     <label className="text-lg">Username</label>
                     <div className="flex my-2">
-                        <input type="text" value="Username" readOnly disabled className="text-smoothGrey w-full focus:outline-none border-2 border-darkPurple rounded-xl h-[35px] p-2"/>
+                        <input id="username-input" type="text" value={username} readOnly={!editingUsername} disabled={!editingUsername} onChange={(e) => {setUsername(e.target.value)}} className="text-smoothGrey w-full focus:outline-none border-2 border-darkPurple rounded-xl h-[35px] p-2 overflow-x-hidden"/>
                         <div className="ml-3">
-                            <FaRegEdit className="w-full h-full m-auto text-[40px] text-darkPurple"/>
+                            {!editingUsername 
+                                ? <div className="flex justify-center">
+                                    <FaRegEdit id="edit-username-btn" className="m-auto text-[40px] text-darkPurple"/>
+                                </div>
+                                : <div className="flex justify-between">
+                                    <MdOutlineClose className="w-full h-full m-auto text-[40px] text-red-500 border-2 border-red-500 mx-2" onClick={() => setEditingUsername(true)}/>
+                                    <MdDone className="w-full h-full m-auto text-[40px] text-green-500 border-2 border-green-500 mx-2" onClick={handleUpdateUsername}/>
+                                </div>
+                            }
                         </div>                        
                     </div>
                 </div>
