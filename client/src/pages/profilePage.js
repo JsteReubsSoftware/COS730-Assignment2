@@ -16,6 +16,7 @@ import * as API from "../api/api";
 
 const ProfilePage = () => {
     const [language, setLanguage] = useState(null);
+    const [blurText, setBlurText] = useState(false);
     
     const options = Object.keys(LANGUAGES).map((key) => ({ value: key, label: LANGUAGES[key][0].toUpperCase() + LANGUAGES[key].slice(1) }));
 
@@ -39,8 +40,8 @@ const ProfilePage = () => {
         }),
     };
 
-    const notify = () => {
-        toast.success('Language preference updated', {
+    const notify = (message) => {
+        toast.success(message, {
             autoClose: 1000
         });
     }
@@ -55,22 +56,37 @@ const ProfilePage = () => {
             if (res && res.success) {
                 setLanguage(res.data.user.language);
 
-                notify();
+                notify('Language Preference Updated');
+            }
+        }
+    }
+
+    const handleBlurTextChange = async () => {
+        const userRes = await API.getUserByEmail(Cookies.get('jwt'));
+                
+        if (userRes.user) {
+            const res = await API.updateUserBlurText(Cookies.get('jwt'), !userRes.user.censoreText, userRes.user.email);
+
+            if (res && res.success) {
+                setBlurText(res.data.user.censoreText);
+
+                notify('Censore Text Preference Updated');
             }
         }
     }
 
     useEffect(() => {
         if (Cookies.get('jwt')) {
-            const getLang = async () => {
+            const getStates = async () => {
                 const res = await API.getUserByEmail(Cookies.get('jwt'));
                 
                 if (res.user) {
                   setLanguage(res.user.language);
+                  setBlurText(res.user.censoreText);
                 }
             };
     
-            getLang();
+            getStates();
         } 
         else {
             window.location.href = "/landing";
@@ -81,7 +97,11 @@ const ProfilePage = () => {
         return options.filter((option) => option.value === language)[0];
     }
 
-    return language ? (
+    const getDefaultBlurText = () => {
+        return blurText != null ? blurText : false;
+    }
+
+    return language && (blurText === true || blurText === false) ? (
         <div className="h-screen w-full bg-smoothWhite grid grid-rows-36">
             <ToastContainer position="top-left"/>
             <div className="w-full h-full flex flex-col p-1 row-start-1 row-span-11">
@@ -106,12 +126,9 @@ const ProfilePage = () => {
                     </div>
                 </div>
                 <div className="mx-10 my-4 flex flex-col">
-                    <label className="text-lg">Email Address</label>
+                    <label className="text-lg">Email Address <span className="text-smoothGrey italic text-sm mx-2">(cannot change email)</span></label>
                     <div className="flex my-2">
-                        <input type="text" value="joostereuben0830@gmail.com" readOnly disabled className="text-smoothGrey w-full focus:outline-none border-2 border-darkPurple rounded-xl h-[35px] p-2"/>
-                        <div className="ml-3">
-                            <FaRegEdit className="w-full h-full m-auto text-[40px] text-darkPurple"/>
-                        </div>                        
+                        <input type="text" value="joostereuben0830@gmail.com" readOnly disabled className="text-smoothGrey w-full focus:outline-none border-2 border-darkPurple rounded-xl h-[35px] p-2"/>                       
                     </div>
                 </div>
                 <div className="mx-10 my-4 flex flex-col">
@@ -126,9 +143,9 @@ const ProfilePage = () => {
                         <span className="text-smoothGrey italic text-sm mx-2">(for messages only)</span>
                     </div>
                     <Toggle
-                            defaultChecked={false}
+                            defaultChecked={getDefaultBlurText()}
                             className='bg-darkPurple self-center '
-                            // onChange={} 
+                            onChange={handleBlurTextChange} 
                         />
                 </div>
                 <div className="m-10 flex justify-center">

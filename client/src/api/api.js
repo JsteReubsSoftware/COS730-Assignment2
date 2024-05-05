@@ -63,6 +63,20 @@ export const updateUserLanguage = async (token, language, email) => {
     return response.data;
 }
 
+export const updateUserBlurText = async (token, blurTextBoolean, email) => {
+    const validToken = await validateToken(token);
+    if (!validToken.valid) {
+        return null;
+    }
+
+    const response = await API.put('/api/updateUserBlurText', {
+        blurTextBoolean,
+        email
+    });
+
+    return response.data;
+}
+
 // ======== Message Service Endpoints =========
 export const sendMessage = async (token, text, senderId, receiverId) => {
     const validToken = await validateToken(token);
