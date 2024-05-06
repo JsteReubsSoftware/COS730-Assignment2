@@ -124,8 +124,6 @@ const updateUsername = async (req, res) => {
     }
 }
 
-// POST requests
-
 const addContact = async (req, res) => {
     try {
         const { newContactEmail, myEmail } = req.body;

@@ -1,8 +1,24 @@
 import { MdAddBox } from "react-icons/md";
 import { IoFilter } from "react-icons/io5";
 import ContactCard from "../components/contactCard";
+import { useEffect, useState } from "react";
+import Cookies from 'js-cookie';
+
+import * as API from "../api/api";
 
 const ContactsPage = () => {
+    const [contacts, setContacts] = useState([]); 
+
+    useEffect(() => {
+        async function fetchContacts() {
+            const res = await API.getUserContacts(Cookies.get('jwt'));
+            console.log(res.data);   
+        }
+
+        fetchContacts();
+
+    }, []);
+
     return (
         <div className="h-screen w-full bg-smoothWhite grid grid-rows-36"> {/* add grids if the screen size is desktop */}
             <div className="w-full h-full bg-transparent flex flex-col p-1 row-start-1 row-span-5">

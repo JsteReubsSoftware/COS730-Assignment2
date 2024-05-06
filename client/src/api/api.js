@@ -61,7 +61,7 @@ export const getUserContacts = async (token) => {
     const params = new URLSearchParams({ email });
     
     const response = await API.get('/api/getUserContacts?' + params.toString());
-    return response.data.data;
+    return response.data;
 }
 
 // PUT requests
