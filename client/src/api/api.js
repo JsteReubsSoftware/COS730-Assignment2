@@ -28,6 +28,8 @@ export const logInGoogle = async (access_token) => {
     return res.data.data;
 }
 
+// GET requests
+
 export const getVerifiedUser = async (token) => {
     const validToken = await validateToken(token);
     if (!validToken.valid) {
@@ -48,6 +50,21 @@ export const getUserByEmail = async (token) => {
     const response = await API.get('/api/getUserByEmail?' + params.toString());
     return response.data.data;
 }
+
+export const getUserContacts = async (token) => {
+    const validToken = await validateToken(token);
+    if (!validToken.valid) {
+        return null;
+    }
+
+    const email = validToken.user.email;
+    const params = new URLSearchParams({ email });
+    
+    const response = await API.get('/api/getUserContacts?' + params.toString());
+    return response.data.data;
+}
+
+// PUT requests
 
 export const updateUserLanguage = async (token, language, email) => {
     const validToken = await validateToken(token);
@@ -91,17 +108,18 @@ export const updateUsername = async (token, username, email) => {
     return response.data;
 }
 
-export const getUserContacts = async (token) => {
+export const addContact = async (token, newContactEmail, myEmail) => {
     const validToken = await validateToken(token);
     if (!validToken.valid) {
         return null;
     }
 
-    const email = validToken.user.email;
-    const params = new URLSearchParams({ email });
-    
-    const response = await API.get('/api/getUserContacts?' + params.toString());
-    return response.data.data;
+    const response = await API.put('/api/addContact', {
+        newContactEmail,
+        myEmail
+    });
+
+    return response.data;
 }
 
 // ======== Message Service Endpoints =========

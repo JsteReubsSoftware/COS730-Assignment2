@@ -1,6 +1,6 @@
 const express = require("express")
 
-const { getUserByEmail, getUserContacts, updateUserLanguage, updateUserBlurText, updateUsername } = require("../controllers/userController")
+const { getUserByEmail, getUserContacts, updateUserLanguage, updateUserBlurText, updateUsername, addContact } = require("../controllers/userController")
 
 const router = express.Router()
 
@@ -15,5 +15,7 @@ router.put("/updateUserLanguage", updateUserLanguage)
 router.put("/updateUserBlurText", updateUserBlurText)
 
 router.put("/updateUsername", updateUsername)
+
+router.put("/addContact", addContact)
 
 module.exports = router;
