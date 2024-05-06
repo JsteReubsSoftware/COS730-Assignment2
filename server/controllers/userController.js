@@ -158,11 +158,43 @@ const addContact = async (req, res) => {
     }
 }
 
+// DELETE requests
+
+const removeContact = async (req, res) => {
+    try {
+        const { contactEmail, myEmail } = req.body;
+
+        if (contactEmail === myEmail) {
+            return res.status(404).json({success: false, data: {message: "Unable to remove contact. Email cannot be the same."}});
+        }
+
+        const count = await User.countDocuments();
+
+        if (count === 0) {
+            return res.status(404).json({success: false, data: {message: "Unable to remove contact. No users schema."}});
+        }
+
+        // check if user exists
+        const user = await User.findOneAndUpdate({email: myEmail}, {$pull: {contacts: {email: contactEmail}}}, {new: true});
+
+        if (!user) {
+            return res.status(404).json({success: false, data: { user: null, message: "User with provided email not found" }});
+        }
+
+        return res.status(200).json({success: true, data: { user: user, message: "User found and contact removed" }});
+
+    } catch(error) {
+        return res.status(500).json({success: false, data: {message: error.message}});
+    }
+}
+
+
 module.exports = {
     getUserByEmail,
     getUserContacts,
     updateUserLanguage,
     updateUserBlurText,
     updateUsername,
-    addContact
+    addContact,
+    removeContact
 }

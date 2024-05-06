@@ -39,16 +39,24 @@ export const getVerifiedUser = async (token) => {
     return validToken.user;
 }
 
-export const getUserByEmail = async (token) => {
+export const getUserByEmail = async (token, newEmail) => {
     const validToken = await validateToken(token);
     if (!validToken.valid) {
         return null;
     }
-    const email = validToken.user.email;
-    const params = new URLSearchParams({ email });
-    
-    const response = await API.get('/api/getUserByEmail?' + params.toString());
-    return response.data.data;
+
+    if (!newEmail) {
+        const email = validToken.user.email;
+        const params = new URLSearchParams({ email });
+        
+        const response = await API.get('/api/getUserByEmail?' + params.toString());
+        return response.data.data;
+    }
+    else {
+        const params = new URLSearchParams({ email: newEmail });
+        const response = await API.get('/api/getUserByEmail?' + params.toString());
+        return response.data.data;
+    }
 }
 
 export const getUserContacts = async (token) => {
@@ -108,14 +116,32 @@ export const updateUsername = async (token, username, email) => {
     return response.data;
 }
 
-export const addContact = async (token, newContactEmail, myEmail) => {
+export const addContact = async (token, newContactEmail) => {
     const validToken = await validateToken(token);
     if (!validToken.valid) {
         return null;
     }
 
+    const myEmail = validToken.user.email;
+
     const response = await API.put('/api/addContact', {
         newContactEmail,
+        myEmail
+    });
+
+    return response.data;
+}
+
+// POST requests
+export const removeContact = async (token, contactEmail) => {
+    const validToken = await validateToken(token);
+    if (!validToken.valid) {
+        return null;
+    }
+
+    const myEmail = validToken.user.email;
+    const response = await API.post('/api/removeContact', {
+        contactEmail,
         myEmail
     });
 
