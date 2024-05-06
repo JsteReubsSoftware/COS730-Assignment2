@@ -2,6 +2,7 @@ const jwt = require("jsonwebtoken")
 const axios = require("axios")
 const User = require("../models/userModel")
 
+// GET requests
 const getUserByEmail = async (req, res) => {
     try {
         const email = req.query.email;
@@ -29,6 +30,34 @@ const getUserByEmail = async (req, res) => {
     }
 }
 
+const getUserContacts = async (req, res) => {
+    try {
+        const email = req.query.email;
+
+        if (!email) {
+            return res.status(200).json({success: true, data: { contacts: [], message: "No email provided." }});
+        }
+
+        // check if collection contains any documents
+        const count = await User.countDocuments();
+
+        if (count === 0) {
+            return res.status(200).json({success: true, data: { contacts: [], message: "No users found." }});
+        }
+
+        const user = await User.findOne({email: email});
+
+        if (!user) {
+            return res.status(200).json({success: true, data: { contacts: [], message: "User not found." }});
+        }
+
+        return res.status(200).json({success: true, data: { contacts: user.contacts, message: "User found." }});
+    } catch(error) {
+        return res.status(500).json({success: false, data: {message: error.message}});
+    }
+}
+
+// PUT requests
 const updateUserLanguage = async (req, res) => {
     try {
         const { language, email } = req.body;
@@ -82,6 +111,7 @@ const updateUsername = async (req, res) => {
 
 module.exports = {
     getUserByEmail,
+    getUserContacts,
     updateUserLanguage,
     updateUserBlurText,
     updateUsername

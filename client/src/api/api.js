@@ -91,6 +91,19 @@ export const updateUsername = async (token, username, email) => {
     return response.data;
 }
 
+export const getUserContacts = async (token) => {
+    const validToken = await validateToken(token);
+    if (!validToken.valid) {
+        return null;
+    }
+
+    const email = validToken.user.email;
+    const params = new URLSearchParams({ email });
+    
+    const response = await API.get('/api/getUserContacts?' + params.toString());
+    return response.data.data;
+}
+
 // ======== Message Service Endpoints =========
 export const sendMessage = async (token, text, senderId, receiverId) => {
     const validToken = await validateToken(token);
