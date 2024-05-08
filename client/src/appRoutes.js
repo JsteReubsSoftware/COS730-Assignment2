@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
+import { Route, Routes, Navigate } from "react-router-dom";
 import LandingPage from "./pages/landingPage";
 import ProfilePage from "./pages/profilePage";
 import ChatRoomPage from "./pages/chatRoomPage";
@@ -6,6 +6,7 @@ import ContactsPage from "./pages/contactsPage";
 import Cookies from 'js-cookie';
 import { jwtDecode } from "jwt-decode";
 import ViewContactPage from "./pages/viewContactPage";
+import { useEffect } from "react";
 
 const AppRoutes = () => {
 
@@ -33,17 +34,15 @@ const AppRoutes = () => {
     }
 
     return (
-        <Router>
-            <Routes>
-                <Route path="/landing" element={<LandingPage />} />
-                <Route path="/profile" element={isLoggedIn() ? <ProfilePage /> : <Navigate replace to="/landing" />} />
-                <Route path="/chatroom" element={isLoggedIn() ? <ChatRoomPage /> : <Navigate replace to="/landing" />} />
-                <Route path="/contacts" element={isLoggedIn() ? <ContactsPage /> : <Navigate replace to="/landing" />} />
-                <Route path="/contacts/view" element={isLoggedIn() ? <ViewContactPage /> : <Navigate replace to="/landing" />} />
-                <Route path="/" element={<Navigate replace to="/landing" />} />
-                <Route path="*" element={<Navigate replace to="/landing" />} />
-            </Routes>
-        </Router>
+        <Routes>
+            <Route path="/landing" element={<LandingPage />} />
+            <Route path="/profile" element={isLoggedIn() ? <ProfilePage /> : <Navigate replace to="/landing" />} />
+            <Route path="/chatroom" element={isLoggedIn() ? <ChatRoomPage /> : <Navigate replace to="/landing" />} />
+            <Route path="/contacts/view" element={isLoggedIn() ? <ViewContactPage /> : <Navigate replace to="/landing" />} />
+            <Route path="/contacts" element={isLoggedIn() ? <ContactsPage /> : <Navigate replace to="/landing" />} />
+            <Route path="/" element={<Navigate replace to="/landing" />} />
+            <Route path="*" element={<Navigate replace to="/landing" />} />
+        </Routes>
     )
 };
 

@@ -12,6 +12,7 @@ import { ImSpinner10 } from "react-icons/im";
 
 const ViewContactPage = () => {  
     const [viewedUser, setViewedUser] = useState(null);
+    const [message, setMessage] = useState("");
 
     useEffect(( ) => {
 
@@ -47,7 +48,7 @@ const ViewContactPage = () => {
                     <div className="flex flex-col pl-3 col-start-4 col-span-9">
                         <div className="w-full h-full my-auto text-2xl text-smoothWhite mt-2">{viewedUser.name}</div>
                         
-                        <div className="w-full h-full pt-2 italic ">
+                        <div className="w-full h-full pt-2">
                             <div className="flex pr-3 justify-start font-bold">
                                 <GoDotFill className="text-green-400"/>
                                 <span className="text-sm text-green-400">Online</span>
@@ -67,7 +68,7 @@ const ViewContactPage = () => {
                     </div>
                     <div className="h-[50px] col-start-8 col-span-29 mx-2 my-auto bg-smoothWhite flex justify-between rounded-xl border-2 border-darkPurple">
                         <input type="text" placeholder="Type a message" className="text-lg w-full h-full bg-transparent outline-none border-none px-2 py-1"/>
-                        <IoSend className=" mx-2 text-darkPurple text-2xl h-full my-auto"/>
+                        <IoSend className=" mx-2 text-darkPurple text-2xl h-full my-auto" disabled={message}/>
                     </div>
                 </div>
             </div>
