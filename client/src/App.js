@@ -9,6 +9,7 @@ import { useLocation } from 'react-router-dom';
 function App() {
   const [selectedTab, setSelectedTab] = useState("contacts");
   const [showBottomNavBar, setShowBottomNavBar] = useState(false);
+  const [socket, setSocket] = useState(null);
 
   const location = useLocation();
 
@@ -28,10 +29,18 @@ function App() {
     }
   }, [location]);
 
+  useEffect(() => {
+    if (socket) {
+      console.log("socket connected");
+    } else {
+      console.log("socket not connected");
+    }
+  }, [socket]);
+
   return (
     <div className="App">
       <GoogleOAuthProvider clientId={process.env.REACT_APP_OAUTH_CLIENT_ID}>
-        <AppRoutes />
+        <AppRoutes setSocket={setSocket} socket={socket}/>
         {showBottomNavBar && <BottomNavBar currentTab={selectedTab}/>}
       </GoogleOAuthProvider>
     </div>

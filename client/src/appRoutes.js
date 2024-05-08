@@ -6,9 +6,8 @@ import ContactsPage from "./pages/contactsPage";
 import Cookies from 'js-cookie';
 import { jwtDecode } from "jwt-decode";
 import ViewContactPage from "./pages/viewContactPage";
-import { useEffect } from "react";
 
-const AppRoutes = () => {
+const AppRoutes = ({ setSocket, socket }) => {
 
     // check if user is logged in
     const isLoggedIn = () => {
@@ -35,7 +34,7 @@ const AppRoutes = () => {
 
     return (
         <Routes>
-            <Route path="/landing" element={<LandingPage />} />
+            <Route path="/landing" element={<LandingPage setSocket={setSocket} socket={socket} />} />
             <Route path="/profile" element={isLoggedIn() ? <ProfilePage /> : <Navigate replace to="/landing" />} />
             <Route path="/chatroom" element={isLoggedIn() ? <ChatRoomPage /> : <Navigate replace to="/landing" />} />
             <Route path="/contacts/view" element={isLoggedIn() ? <ViewContactPage /> : <Navigate replace to="/landing" />} />

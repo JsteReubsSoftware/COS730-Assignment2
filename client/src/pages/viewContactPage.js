@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import Cookies from 'js-cookie';
 import * as API from "../api/api";
+import {socket} from "../socket";
 
 import { IoArrowBackOutline } from "react-icons/io5";
 import { MdCall } from "react-icons/md";
@@ -13,6 +14,19 @@ import { ImSpinner10 } from "react-icons/im";
 const ViewContactPage = () => {  
     const [viewedUser, setViewedUser] = useState(null);
     const [message, setMessage] = useState("");
+
+    const handleSendMessage = async (message) => {
+        // const res = await API.sendMessage(Cookies.get('jwt'), viewedUser._id, message);
+
+        // if (res.success) {
+        //     setMessage("");
+        //     document.getElementById("message-input").blur();
+
+        //     // use socket to emit message
+        //     socket.emit('message', res.data.message);
+        // }
+        socket.emit('private-message', viewedUser._id, Cookies.get('jwt'), message);
+    }
 
     useEffect(( ) => {
 
@@ -67,8 +81,8 @@ const ViewContactPage = () => {
                         <FaRegImage className="text-smoothWhite text-4xl h-full mx-auto"/>
                     </div>
                     <div className="h-[50px] col-start-8 col-span-29 mx-2 my-auto bg-smoothWhite flex justify-between rounded-xl border-2 border-darkPurple">
-                        <input type="text" placeholder="Type a message" className="text-lg w-full h-full bg-transparent outline-none border-none px-2 py-1"/>
-                        <IoSend className=" mx-2 text-darkPurple text-2xl h-full my-auto" disabled={message}/>
+                        <input id="message-input" type="text" placeholder="Type a message" className="text-lg w-full h-full bg-transparent outline-none border-none px-2 py-1" onChange={(e) => setMessage(e.target.value)}/>
+                        <IoSend className={`mx-2 text-darkPurple text-2xl h-full my-auto ${message !== "" ? "cursor-pointer" : "opacity-60"}`} onClick={() => message !== "" && handleSendMessage(message)}/>
                     </div>
                 </div>
             </div>

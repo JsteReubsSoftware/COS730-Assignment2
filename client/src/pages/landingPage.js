@@ -2,8 +2,10 @@ import React, { useState, useEffect } from "react";
 import { useGoogleLogin, googleLogout } from '@react-oauth/google';
 import * as API from "../api/api";
 import Cookies from 'js-cookie';
+import io from 'socket.io-client'
+import { Link } from "react-router-dom";
 
-const LandingPage = () => {
+const LandingPage = ({ setSocket, socket }) => {
   const [ profile, setProfile ] = useState(null);
     
   const login = useGoogleLogin({
@@ -13,6 +15,17 @@ const LandingPage = () => {
         setProfile(res['result']);
         const now = new Date();
         Cookies.set('jwt', res['token'], { expires: now.setDate(now.getDate() + 1) });
+
+        // if user logged in we connect them to the server
+        const newSocket = io.connect(`http://localhost:${process.env.REACT_APP_SERVER_PORT}`, {
+          extraHeaders: {
+            'user-id' : res['result']['_id'],
+            'token' : Cookies.get('jwt')
+          }
+        });
+        // const newSocket = io.connect("https://rj-automated-api.onrender.com");
+
+        setSocket(newSocket);
       }
       loginRequest()
     },
@@ -27,6 +40,8 @@ const LandingPage = () => {
     setProfile(null);
     localStorage.clear();
     Cookies.remove('jwt');
+    socket.emit('logout');
+    setSocket(null);
   };
 
     useEffect(() => {
@@ -36,13 +51,24 @@ const LandingPage = () => {
           
           if (res.user) {
             setProfile(res.user);
+
+            // if user logged in we connect them to the server
+            const newSocket = io.connect(`http://localhost:${process.env.REACT_APP_SERVER_PORT}`, {
+              extraHeaders: {
+                'user-id' : res.user._id,
+                'token' : Cookies.get('jwt')
+              }
+            });
+            // const newSocket = io.connect("https://rj-automated-api.onrender.com");
+
+            setSocket(newSocket);
           }
         }
 
         getUser();
       }
 
-    },[]);
+    },[setSocket]);
 
     return (
       <div className="w-full bg-gradient-to-b from-darkPurple to-whitePurple h-screen flex justify-center">
@@ -60,7 +86,7 @@ const LandingPage = () => {
               </div>
               <button onClick={logout} className="text-red-500">Log out</button>
             </div>
-            <button onClick={() => window.location.href = "/contacts"} className="m-auto border-2 bg-darkPurple rounded-md p-5 text-center text-smoothWhite font-bold hover:cursor-pointer">Go to Home Page</button>
+            <Link to='/contacts' className="m-auto border-2 bg-darkPurple rounded-md p-5 text-center text-smoothWhite font-bold hover:cursor-pointer">Go to Home Page</Link>
           </>
         ) : (
           <div onClick={login} className="m-auto border-2 bg-darkPurple rounded-md p-5 text-center text-smoothWhite font-bold hover:cursor-pointer">Sign in with Google 🚀 </div>

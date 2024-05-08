@@ -164,7 +164,7 @@ export const removeContact = async (token, contactEmail) => {
 }
 
 // ======== Message Service Endpoints =========
-export const sendMessage = async (token, text, senderId, receiverId) => {
+export const sendMessage = async (token, text, receiverId) => {
     const validToken = await validateToken(token);
     if (!validToken.valid) {
         return null;
@@ -172,13 +172,9 @@ export const sendMessage = async (token, text, senderId, receiverId) => {
 
     const response = await API.post('/api/sendMessage', {
         text,
-        senderId,
-        receiverId
+        receiverId,
+        senderId: validToken.user.id
     });
 
-    if (!response.data.success) {
-        return null; // we will create a pop up on the UI to indicate that a messageservice error has occurred
-    }
-
-    return response.data.data; // we will emit the message content using the socket in the frontend
+    return response; // we will emit the message content using the socket in the frontend
 }

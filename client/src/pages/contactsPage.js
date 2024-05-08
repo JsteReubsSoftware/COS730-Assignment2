@@ -1,5 +1,7 @@
 import { MdAddBox } from "react-icons/md";
 import { IoFilter } from "react-icons/io5";
+import { ImSpinner10 } from "react-icons/im";
+
 import ContactCard from "../components/contactCard";
 import { useEffect, useState } from "react";
 import Cookies from 'js-cookie';
@@ -10,7 +12,7 @@ import * as API from "../api/api";
 import AddContactModal from "../components/addContactModal";
 
 const ContactsPage = () => {
-    const [contacts, setContacts] = useState([]); 
+    const [contacts, setContacts] = useState(null); 
     const [showModal, setShowModal] = useState(false);
 
     const addNewContact = async (updatedContacts) => {
@@ -36,16 +38,14 @@ const ContactsPage = () => {
         async function fetchContacts() {
             const res = await API.getUserContacts(Cookies.get('jwt'));
             
-            if (res.success) {
-                setContacts(res.data.contacts);
-            }
+            setContacts(res.data.contacts);
         }
 
         fetchContacts();
 
     }, []);
 
-    return (
+    return contacts ? (
         <div className="relative h-screen w-full bg-smoothWhite grid grid-rows-36"> {/* add grids if the screen size is desktop */}
             <ToastContainer position="top-left"/>
             <div className="w-full h-full bg-transparent flex flex-col p-1 row-start-1 row-span-5">
@@ -78,6 +78,15 @@ const ContactsPage = () => {
                 <div className="absolute w-full h-full bg-smoothGrey bg-opacity-50 z-10 flex justify-center px-10 py-60">
                     <AddContactModal isOpen={showModal} onClose={(message) => handleClose(message)} updateContacts={(updatedContacts) => addNewContact(updatedContacts)} />
                 </div>}
+        </div>
+    ) : (
+        <div className="h-screen w-full flex justify-center bg-smoothWhite">
+            <div className="flex flex-col w-1/4 h-1/4 m-auto">
+                <div>
+                    <ImSpinner10 className="w-full h-full text-darkPurple animate-spin"/>
+                </div>
+                <label className="w-full h-full text-md mt-2 text-darkPurple text-center">Loading...</label>
+            </div>
         </div>
     )
 };

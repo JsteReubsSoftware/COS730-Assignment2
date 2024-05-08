@@ -4,6 +4,10 @@ const mongoose = require('mongoose')
 const cors = require('cors')
 const app = express()
 const chatServer = http.createServer(app)
+const jwt = require('jsonwebtoken')
+const Cookies = require('js-cookie')
+
+let connectedUsers = []
 
 const allowedOrigins = [
     'https://rj-automated-api-app.onrender.com',
@@ -33,12 +37,38 @@ app.use("/api", require("./routes/userRoutes"))
 app.use("/api", require("./routes/messageRoutes"))
 
 // ---------------------------------------------------
+const verifyToken = (token) => {
+    // Replace with your token verification logic using your secret key
+    try {
+        const decoded = jwt.verify(token, process.env.REACT_APP_JWT_SECRET_KEY);
+        return decoded; // Return decoded user information if valid
+    } catch (error) {
+        return false; // Invalid token
+    }
+};
 
 io.on('connection', (socket) => {
     console.log('user connected')
 
+    socket.id = socket.handshake.headers['user-id']
+
+    console.log(socket.id)
+
     socket.on('disconnect', () => {
         console.log('user disconnected')
+    })
+
+    socket.on('logout', () => {
+        socket.disconnect()
+    })
+
+    socket.on('private-message', ({ receiverId, text }) => {
+
+        socket.to(receiverId).emit('private-message', {
+            receiverId,
+            senderId: socket.id,
+            text
+        })
     })
 })
 
