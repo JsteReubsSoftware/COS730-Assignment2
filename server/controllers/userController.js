@@ -30,6 +30,33 @@ const getUserByEmail = async (req, res) => {
     }
 }
 
+const getUserById = async (req, res) => {
+    try {
+        const id = req.query.id;
+
+        if (!id) {
+            return res.status(200).json({success: true, data: { user: null, message: "No id provided." }});
+        }
+
+        // check if collection contains any documents
+        const count = await User.countDocuments();
+
+        if (count === 0) {
+            return res.status(200).json({success: true, data: { user: null, message: "No users found." }});
+        }
+
+        const user = await User.findOne({_id: id});
+
+        if (!user) {
+            return res.status(200).json({success: true, data: { user: null, message: "User not found with provided id." }});
+        }
+
+        return res.status(200).json({success: true, data: { user: user, message: "User found." }});
+    } catch(error) {
+        return res.status(500).json({success: false, data: {message: error.message}});
+    }
+}
+
 const getUserContacts = async (req, res) => {
     try {
         const email = req.query.email;
@@ -192,6 +219,7 @@ const removeContact = async (req, res) => {
 module.exports = {
     getUserByEmail,
     getUserContacts,
+    getUserById,
     updateUserLanguage,
     updateUserBlurText,
     updateUsername,

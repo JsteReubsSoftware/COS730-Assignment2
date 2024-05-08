@@ -59,6 +59,21 @@ export const getUserByEmail = async (token, newEmail) => {
     }
 }
 
+export const getUserById = async (token, contactId) => {
+    const validToken = await validateToken(token);
+    if (!validToken.valid) {
+        return null;
+    }
+
+    if (!contactId) {
+        return null
+    }
+    
+    const params = new URLSearchParams({ id: contactId });
+    const response = await API.get('/api/getUserById?' + params.toString());
+    return response.data.data;
+}
+
 export const getUserContacts = async (token) => {
     const validToken = await validateToken(token);
     if (!validToken.valid) {

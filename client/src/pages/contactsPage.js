@@ -68,7 +68,9 @@ const ContactsPage = () => {
             <div className="w-full h-full pb-5 overflow-auto flex flex-col row-start-6 row-span-29">
                 {
                     // render the contact cards
-                    Array.from({ length: 20 }).map((_, index) => <ContactCard key={index} />)
+                    contacts.map((contact) => (
+                        <ContactCard key={contact._id} contact={contact} />
+                    ))
                 }
             </div>
             {/* render the contact view page if the screen size allows it */}

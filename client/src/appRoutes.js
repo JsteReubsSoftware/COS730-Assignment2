@@ -5,6 +5,7 @@ import ChatRoomPage from "./pages/chatRoomPage";
 import ContactsPage from "./pages/contactsPage";
 import Cookies from 'js-cookie';
 import { jwtDecode } from "jwt-decode";
+import ViewContactPage from "./pages/viewContactPage";
 
 const AppRoutes = () => {
 
@@ -38,6 +39,7 @@ const AppRoutes = () => {
                 <Route path="/profile" element={isLoggedIn() ? <ProfilePage /> : <Navigate replace to="/landing" />} />
                 <Route path="/chatroom" element={isLoggedIn() ? <ChatRoomPage /> : <Navigate replace to="/landing" />} />
                 <Route path="/contacts" element={isLoggedIn() ? <ContactsPage /> : <Navigate replace to="/landing" />} />
+                <Route path="/contacts/view" element={isLoggedIn() ? <ViewContactPage /> : <Navigate replace to="/landing" />} />
                 <Route path="/" element={<Navigate replace to="/landing" />} />
                 <Route path="*" element={<Navigate replace to="/landing" />} />
             </Routes>
