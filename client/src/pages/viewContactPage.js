@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import Cookies from 'js-cookie';
 import * as API from "../api/api";
-import {socket} from "../socket";
 
 import { IoArrowBackOutline } from "react-icons/io5";
 import { MdCall } from "react-icons/md";
@@ -11,11 +10,15 @@ import { FaRegImage } from "react-icons/fa6";
 import { IoSend } from "react-icons/io5";
 import { ImSpinner10 } from "react-icons/im";
 
+import { socket } from "../socket";
+
 const ViewContactPage = () => {  
     const [viewedUser, setViewedUser] = useState(null);
     const [message, setMessage] = useState("");
 
-    const handleSendMessage = async (message) => {
+    const [messagesSent, setMessagesSent] = useState([]);
+
+    const handleSendMessage = async (event, text) => {
         // const res = await API.sendMessage(Cookies.get('jwt'), viewedUser._id, message);
 
         // if (res.success) {
@@ -25,7 +28,12 @@ const ViewContactPage = () => {
         //     // use socket to emit message
         //     socket.emit('message', res.data.message);
         // }
-        socket.emit('private-message', viewedUser._id, Cookies.get('jwt'), message);
+        socket.emit('private-message', viewedUser._id, Cookies.get('jwt'), text);
+        const msgInput = document.getElementById("message-input"); 
+        msgInput.value = "";
+        msgInput.focus();
+
+        event.stopPropagation();
     }
 
     useEffect(( ) => {
@@ -47,6 +55,13 @@ const ViewContactPage = () => {
         else {
             window.location.href = "/landing";
         }
+
+        socket.on('private-message', (receiver, sender, content) => {
+            console.log('private-message received:', receiver, sender, content); 
+            setMessagesSent(messagesSent => [...messagesSent, { receiver, sender, content }]);
+        });
+
+        return ( ) => { socket.off('disconnect') };
 
     }, [ ]);
 
@@ -75,6 +90,9 @@ const ViewContactPage = () => {
                 </div>
             </div>
             <div className="relative row-start-4 row-span-33 bg-opacity-80 bg-smoothWhite">
+                {messagesSent.map((message, index) => (
+                    <div key={index} className={`w-full h-auto ${message.senderId === viewedUser._id ? "justify-start" : "justify-end"}`}>{message.content}</div>
+                ))}
                 <div className="absolute bottom-0 w-full h-[70px] grid grid-cols-36 bg-darkPurple ">
                     <div className="h-full w-full col-start-1 col-span-7 flex justify-evenly">
                         <MdAddBox className="text-smoothWhite text-4xl h-full mx-auto"/>
@@ -82,7 +100,7 @@ const ViewContactPage = () => {
                     </div>
                     <div className="h-[50px] col-start-8 col-span-29 mx-2 my-auto bg-smoothWhite flex justify-between rounded-xl border-2 border-darkPurple">
                         <input id="message-input" type="text" placeholder="Type a message" className="text-lg w-full h-full bg-transparent outline-none border-none px-2 py-1" onChange={(e) => setMessage(e.target.value)}/>
-                        <IoSend className={`mx-2 text-darkPurple text-2xl h-full my-auto ${message !== "" ? "cursor-pointer" : "opacity-60"}`} onClick={() => message !== "" && handleSendMessage(message)}/>
+                        <IoSend className={`mx-2 text-darkPurple text-2xl h-full my-auto ${message !== "" ? "cursor-pointer" : "opacity-60"}`} onClick={(e) => message !== "" && handleSendMessage(e, message)}/>
                     </div>
                 </div>
             </div>

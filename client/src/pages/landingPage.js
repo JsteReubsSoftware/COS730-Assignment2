@@ -5,7 +5,7 @@ import Cookies from 'js-cookie';
 import io from 'socket.io-client'
 import { Link } from "react-router-dom";
 
-const LandingPage = ({ setSocket, socket }) => {
+const LandingPage = () => {
   const [ profile, setProfile ] = useState(null);
     
   const login = useGoogleLogin({
@@ -15,17 +15,6 @@ const LandingPage = ({ setSocket, socket }) => {
         setProfile(res['result']);
         const now = new Date();
         Cookies.set('jwt', res['token'], { expires: now.setDate(now.getDate() + 1) });
-
-        // if user logged in we connect them to the server
-        const newSocket = io.connect(`http://localhost:${process.env.REACT_APP_SERVER_PORT}`, {
-          extraHeaders: {
-            'user-id' : res['result']['_id'],
-            'token' : Cookies.get('jwt')
-          }
-        });
-        // const newSocket = io.connect("https://rj-automated-api.onrender.com");
-
-        setSocket(newSocket);
       }
       loginRequest()
     },
@@ -40,8 +29,6 @@ const LandingPage = ({ setSocket, socket }) => {
     setProfile(null);
     localStorage.clear();
     Cookies.remove('jwt');
-    socket.emit('logout');
-    setSocket(null);
   };
 
     useEffect(() => {
@@ -51,24 +38,13 @@ const LandingPage = ({ setSocket, socket }) => {
           
           if (res.user) {
             setProfile(res.user);
-
-            // if user logged in we connect them to the server
-            const newSocket = io.connect(`http://localhost:${process.env.REACT_APP_SERVER_PORT}`, {
-              extraHeaders: {
-                'user-id' : res.user._id,
-                'token' : Cookies.get('jwt')
-              }
-            });
-            // const newSocket = io.connect("https://rj-automated-api.onrender.com");
-
-            setSocket(newSocket);
           }
         }
 
         getUser();
       }
 
-    },[setSocket]);
+    },[]);
 
     return (
       <div className="w-full bg-gradient-to-b from-darkPurple to-whitePurple h-screen flex justify-center">

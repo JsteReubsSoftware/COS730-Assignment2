@@ -7,8 +7,6 @@ const chatServer = http.createServer(app)
 const jwt = require('jsonwebtoken')
 const Cookies = require('js-cookie')
 
-let connectedUsers = []
-
 const allowedOrigins = [
     'https://rj-automated-api-app.onrender.com',
     `http://localhost:${process.env.REACT_APP_CLIENT_PORT}`,
@@ -26,6 +24,10 @@ const io = require('socket.io')(chatServer, {
         }
     }
 })
+
+app.get('/', (req, res) => {
+    res.sendFile(join(__dirname, 'index.html'));
+});
 
 app.use(cors())
 app.use(express.json())
@@ -47,28 +49,44 @@ const verifyToken = (token) => {
     }
 };
 
+var usersConnected = []
+
 io.on('connection', (socket) => {
+    
     console.log('user connected')
 
-    socket.id = socket.handshake.headers['user-id']
+    socket.on('user-connected', () => {
+        usersConnected.push({
+            id: socket.id,
+            userId: jwt.decode(socket.handshake.headers['token']).id,
+            token: socket.handshake.headers['token']
+        })
 
-    console.log(socket.id)
+        console.log(usersConnected)
+    })
 
     socket.on('disconnect', () => {
         console.log('user disconnected')
+
+        usersConnected = usersConnected.filter(user => user.id !== socket.id)
     })
 
     socket.on('logout', () => {
         socket.disconnect()
     })
 
-    socket.on('private-message', ({ receiverId, text }) => {
+    socket.on('private-message', (viewedUserId, token, text) => {
+        // extract id from token
+        const myID = jwt.decode(token)
 
-        socket.to(receiverId).emit('private-message', {
-            receiverId,
-            senderId: socket.id,
-            text
-        })
+        console.log('private-message sent:', viewedUserId, myID.id, text)
+
+        // get viewed user
+        const viewedUser = usersConnected.find(user => user.userId === viewedUserId)
+        const viewedUserSocketID = viewedUser.id
+
+        io.to(viewedUserSocketID).emit('private-message', viewedUserId, myID.id, text);
+        socket.emit('private-message', viewedUserId, myID.id, text);
     })
 })
 

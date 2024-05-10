@@ -7,7 +7,7 @@ import Cookies from 'js-cookie';
 import { jwtDecode } from "jwt-decode";
 import ViewContactPage from "./pages/viewContactPage";
 
-const AppRoutes = ({ setSocket, socket }) => {
+const AppRoutes = () => {
 
     // check if user is logged in
     const isLoggedIn = () => {
@@ -34,11 +34,11 @@ const AppRoutes = ({ setSocket, socket }) => {
 
     return (
         <Routes>
-            <Route path="/landing" element={<LandingPage setSocket={setSocket} socket={socket} />} />
-            <Route path="/profile" element={isLoggedIn() ? <ProfilePage /> : <Navigate replace to="/landing" />} />
-            <Route path="/chatroom" element={isLoggedIn() ? <ChatRoomPage /> : <Navigate replace to="/landing" />} />
-            <Route path="/contacts/view" element={isLoggedIn() ? <ViewContactPage /> : <Navigate replace to="/landing" />} />
-            <Route path="/contacts" element={isLoggedIn() ? <ContactsPage /> : <Navigate replace to="/landing" />} />
+            <Route path="/landing" element={<LandingPage />} />
+            <Route path="/profile" element={isLoggedIn() ? <ProfilePage/> : <Navigate replace to="/landing" />} />
+            <Route path="/chatroom" element={isLoggedIn() ? <ChatRoomPage/> : <Navigate replace to="/landing" />} />
+            <Route path="/contacts/view" element={isLoggedIn() ? <ViewContactPage/> : <Navigate replace to="/landing" />} />
+            <Route path="/contacts" element={isLoggedIn() ? <ContactsPage/> : <Navigate replace to="/landing" />} />
             <Route path="/" element={<Navigate replace to="/landing" />} />
             <Route path="*" element={<Navigate replace to="/landing" />} />
         </Routes>
