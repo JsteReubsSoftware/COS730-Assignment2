@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Cookies from 'js-cookie';
 import * as API from "../api/api";
 
@@ -13,10 +13,104 @@ import { ImSpinner10 } from "react-icons/im";
 import { socket } from "../socket";
 
 const ViewContactPage = () => {  
+    const messagesContainerRef = useRef(null);
+    const [hasScrolled, setHasScrolled] = useState(false);
     const [viewedUser, setViewedUser] = useState(null);
     const [message, setMessage] = useState("");
-
-    const [messagesSent, setMessagesSent] = useState([]);
+    const [messagesSent, setMessagesSent] = useState(
+        [
+            {
+              sender: '66392d2b172a67e84e1fa15a',
+              receiver: '662bfca7d0ed702985e5e27e',
+              content: 'Hey there! What are you up to?',
+              messageTime: 1652180540000 // Thursday, May 9 2024, 1:35:40 AM PST
+            },
+            {
+              sender: '662bfca7d0ed702985e5e27e',
+              receiver: '66392d2b172a67e84e1fa15a',
+              content: 'Just chilling, watching some Netflix. What about you?',
+              messageTime: 1652180600000 // Thursday, May 9 2024, 1:36:00 AM PST
+            },
+            {
+              sender: '66392d2b172a67e84e1fa15a',
+              receiver: '662bfca7d0ed702985e5e27e',
+              content: 'Same here! Picking a movie to watch now. Any recommendations?',
+              messageTime: 1652180660000 // Thursday, May 9 2024, 1:37:40 AM PST
+            },
+            {
+                sender: '66392d2b172a67e84e1fa15a',
+                receiver: '662bfca7d0ed702985e5e27e',
+                content: 'Hey there! What are you up to?',
+                messageTime: 1652180540000 // Thursday, May 9 2024, 1:35:40 AM PST
+              },
+              {
+                sender: '662bfca7d0ed702985e5e27e',
+                receiver: '66392d2b172a67e84e1fa15a',
+                content: 'Just chilling, watching some Netflix. What about you?',
+                messageTime: 1652180600000 // Thursday, May 9 2024, 1:36:00 AM PST
+              },
+              {
+                sender: '66392d2b172a67e84e1fa15a',
+                receiver: '662bfca7d0ed702985e5e27e',
+                content: 'Same here! Picking a movie to watch now. Any recommendations?',
+                messageTime: 1652180660000 // Thursday, May 9 2024, 1:37:40 AM PST
+              },
+              {
+                sender: '66392d2b172a67e84e1fa15a',
+                receiver: '662bfca7d0ed702985e5e27e',
+                content: 'Hey there! What are you up to?',
+                messageTime: 1652180540000 // Thursday, May 9 2024, 1:35:40 AM PST
+              },
+              {
+                sender: '662bfca7d0ed702985e5e27e',
+                receiver: '66392d2b172a67e84e1fa15a',
+                content: 'Just chilling, watching some Netflix. What about you?',
+                messageTime: 1652180600000 // Thursday, May 9 2024, 1:36:00 AM PST
+              },
+              {
+                sender: '66392d2b172a67e84e1fa15a',
+                receiver: '662bfca7d0ed702985e5e27e',
+                content: 'Same here! Picking a movie to watch now. Any recommendations?',
+                messageTime: 1652180660000 // Thursday, May 9 2024, 1:37:40 AM PST
+              },
+              {
+                sender: '66392d2b172a67e84e1fa15a',
+                receiver: '662bfca7d0ed702985e5e27e',
+                content: 'Hey there! What are you up to?',
+                messageTime: 1652180540000 // Thursday, May 9 2024, 1:35:40 AM PST
+              },
+              {
+                sender: '662bfca7d0ed702985e5e27e',
+                receiver: '66392d2b172a67e84e1fa15a',
+                content: 'Just chilling, watching some Netflix. What about you?',
+                messageTime: 1652180600000 // Thursday, May 9 2024, 1:36:00 AM PST
+              },
+              {
+                sender: '66392d2b172a67e84e1fa15a',
+                receiver: '662bfca7d0ed702985e5e27e',
+                content: 'Same here! Picking a movie to watch now. Any recommendations?',
+                messageTime: 1652180660000 // Thursday, May 9 2024, 1:37:40 AM PST
+              },
+              {
+                sender: '66392d2b172a67e84e1fa15a',
+                receiver: '662bfca7d0ed702985e5e27e',
+                content: 'Hey there! What are you up to?',
+                messageTime: 1652180540000 // Thursday, May 9 2024, 1:35:40 AM PST
+              },
+              {
+                sender: '662bfca7d0ed702985e5e27e',
+                receiver: '66392d2b172a67e84e1fa15a',
+                content: 'Just chilling, watching some Netflix. What about you?',
+                messageTime: 1652180600000 // Thursday, May 9 2024, 1:36:00 AM PST
+              },
+              {
+                sender: '66392d2b172a67e84e1fa15a',
+                receiver: '662bfca7d0ed702985e5e27e',
+                content: 'Same here! Picking a movie to watch now. Any recommendations?',
+                messageTime: 1652180660000 // Thursday, May 9 2024, 1:37:40 AM PST
+              }
+          ]
+    );
 
     const handleSendMessage = async (event, text) => {
         // const res = await API.sendMessage(Cookies.get('jwt'), viewedUser._id, message);
@@ -28,7 +122,7 @@ const ViewContactPage = () => {
         //     // use socket to emit message
         //     socket.emit('message', res.data.message);
         // }
-        socket.emit('private-message', viewedUser._id, Cookies.get('jwt'), text);
+        socket.emit('private-message', viewedUser._id, Cookies.get('jwt'), text, new Date().getTime());
         const msgInput = document.getElementById("message-input"); 
         msgInput.value = "";
         msgInput.focus();
@@ -36,8 +130,55 @@ const ViewContactPage = () => {
         event.stopPropagation();
     }
 
-    useEffect(( ) => {
+    const formatTime = (time) => {
+    //     // Test cases: Today
+    //     const todayTestTime = new Date().getTime();
 
+    //     // Test cases: Yesterday
+    //     const yesterdayTestTime = new Date().getTime() - (1000 * 60 * 60 * 24); // Subtract a day in milliseconds
+
+    //     // Test cases: This week (Monday to Sunday)
+    //     const thisWeekTestTime = new Date().getTime() - (1000 * 60 * 60 * 24 * 2); // Subtract 2 days
+
+    //     // Test cases: More than a week ago
+    //     const moreThanWeekTestTime = new Date().getTime() - (1000 * 60 * 60 * 24 * 8); // Subtract 8 days
+
+        const messageTime = new Date(time); // Create a Date object from the timestamp
+        const now = new Date(); // Get the current date and time
+
+        // Calculate the difference in days between the message time and now
+        const daysDifference = Math.floor((now - messageTime) / (1000 * 60 * 60 * 24));
+
+        let formattedTime;
+        const hours = messageTime.getHours();
+        const minutes = messageTime.getMinutes().toString().padStart(2, '0'); // Pad minutes with leading zero if needed
+        const amPm = hours >= 12 ? 'PM' : 'AM';
+        const formattedHours = hours % 12 || 12; // Convert to 12-hour format (12 for midnight)
+
+        if (daysDifference === 0) {
+            // Today
+            formattedTime = `${formattedHours}:${minutes} ${amPm}`;
+        } else if (daysDifference === 1) {
+            // Yesterday
+            formattedTime = `Yesterday at ${formattedHours}:${minutes} ${amPm}`;
+        } else if (daysDifference <= 7) {
+            // This week (Monday to Sunday)
+            const weekday = new Intl.DateTimeFormat([], { weekday: 'short' }).format(messageTime);
+            formattedTime = `${weekday} at ${formattedHours}:${minutes} ${amPm}`;
+        } else {
+            // More than a week ago
+            const formattedDate = messageTime.toLocaleDateString('en-US', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            });
+            formattedTime = formattedDate;
+        }
+
+        return formattedTime;
+    }
+
+    useEffect(( ) => {
         if (Cookies.get('jwt')) {
             const getStates = async () => {
                 const urlSearchString = window.location.search;       
@@ -51,19 +192,37 @@ const ViewContactPage = () => {
             };
     
             getStates();
+
+            const messageContainer = document.querySelector('.message-list'); // Replace with actual class
+            if (messageContainer) {
+                messageContainer.scrollTop = messageContainer.scrollHeight; // Scroll to bottom
+            }
         } 
         else {
             window.location.href = "/landing";
         }
 
-        socket.on('private-message', (receiver, sender, content) => {
-            console.log('private-message received:', receiver, sender, content); 
-            setMessagesSent(messagesSent => [...messagesSent, { receiver, sender, content }]);
+        socket.on('private-message', (receiver, sender, content, time) => {
+            console.log('private-message received:', receiver, sender, content, time); 
+            setMessagesSent(messagesSent => [...messagesSent, { receiver, sender, content, time }]);
         });
 
         return ( ) => { socket.off('disconnect') };
 
     }, [ ]);
+
+    useEffect(() => {
+        // Scroll to bottom whenever messages update
+        messagesContainerRef.current?.scrollTo({
+            top: messagesContainerRef.current.scrollHeight,
+            behavior: 'smooth' // Animate the scroll
+        });
+
+        if (!hasScrolled && viewedUser && document.querySelector('.message-list')) {
+            document.querySelector('.message-list').scrollTop = document.querySelector('.message-list').scrollHeight;
+            setHasScrolled(true);
+        }
+    }, [messagesSent, hasScrolled, viewedUser]); // Re-run effect only when messagesSent changes
 
     return viewedUser ? (
         <div className="h-screen w-full grid grid-rows-36" style={{backgroundImage: `url(${require('../assets/chat-bg.jpg')})`}}>
@@ -89,19 +248,25 @@ const ViewContactPage = () => {
                     <MdCall className=" text-smoothWhite text-4xl h-full mx-auto" />
                 </div>
             </div>
-            <div className="relative row-start-4 row-span-33 bg-opacity-80 bg-smoothWhite">
-                {messagesSent.map((message, index) => (
-                    <div key={index} className={`w-full h-auto ${message.senderId === viewedUser._id ? "justify-start" : "justify-end"}`}>{message.content}</div>
-                ))}
-                <div className="absolute bottom-0 w-full h-[70px] grid grid-cols-36 bg-darkPurple ">
-                    <div className="h-full w-full col-start-1 col-span-7 flex justify-evenly">
-                        <MdAddBox className="text-smoothWhite text-4xl h-full mx-auto"/>
-                        <FaRegImage className="text-smoothWhite text-4xl h-full mx-auto"/>
-                    </div>
-                    <div className="h-[50px] col-start-8 col-span-29 mx-2 my-auto bg-smoothWhite flex justify-between rounded-xl border-2 border-darkPurple">
-                        <input id="message-input" type="text" placeholder="Type a message" className="text-lg w-full h-full bg-transparent outline-none border-none px-2 py-1" onChange={(e) => setMessage(e.target.value)}/>
-                        <IoSend className={`mx-2 text-darkPurple text-2xl h-full my-auto ${message !== "" ? "cursor-pointer" : "opacity-60"}`} onClick={(e) => message !== "" && handleSendMessage(e, message)}/>
-                    </div>
+            <div className="relative row-start-4 row-span-30 bg-opacity-80 bg-smoothWhite">
+                <div ref={messagesContainerRef} id="message-list" className="h-full w-full flex flex-col pt-3 bg-red-500 overflow-y-scroll scroll-smooth">
+                    {messagesSent.map((message, index) => (
+                        <div key={index} className={`px-3 py-1 w-fit h-auto my-1 mx-2 rounded-xl ${message.sender === viewedUser._id ? "self-start bg-slate-300" : "self-end bg-lightPurple"}`}>
+                            <div className="w-fit max-w-80 break-words">{message.content}</div>
+                            <div className={`${message.sender === viewedUser._id ? "text-smoothGrey" : "text-whitePurple"} text-[10px] font-bold text-end`}>{formatTime(message.messageTime)}</div>
+                        </div>
+                    ))}
+                </div>
+                
+            </div>
+            <div className="w-full row-start-34 row-span-3 grid grid-cols-36 bg-darkPurple ">
+                <div className="h-full w-full col-start-1 col-span-7 flex justify-evenly">
+                    <MdAddBox className="text-smoothWhite text-4xl h-full mx-auto"/>
+                    <FaRegImage className="text-smoothWhite text-4xl h-full mx-auto"/>
+                </div>
+                <div className="h-[50px] col-start-8 col-span-29 mx-2 my-auto bg-smoothWhite flex justify-between rounded-xl border-2 border-darkPurple">
+                    <input id="message-input" type="text" placeholder="Type a message" className="text-lg w-full h-full bg-transparent outline-none border-none px-2 py-1" onChange={(e) => setMessage(e.target.value)}/>
+                    <IoSend className={`mx-2 text-darkPurple text-2xl h-full my-auto ${message !== "" ? "cursor-pointer" : "opacity-60"}`} onClick={(e) => message !== "" && handleSendMessage(e, message)}/>
                 </div>
             </div>
         </div>

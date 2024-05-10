@@ -61,8 +61,6 @@ io.on('connection', (socket) => {
             userId: jwt.decode(socket.handshake.headers['token']).id,
             token: socket.handshake.headers['token']
         })
-
-        console.log(usersConnected)
     })
 
     socket.on('disconnect', () => {
@@ -75,18 +73,16 @@ io.on('connection', (socket) => {
         socket.disconnect()
     })
 
-    socket.on('private-message', (viewedUserId, token, text) => {
+    socket.on('private-message', (viewedUserId, token, text, time) => {
         // extract id from token
         const myID = jwt.decode(token)
-
-        console.log('private-message sent:', viewedUserId, myID.id, text)
 
         // get viewed user
         const viewedUser = usersConnected.find(user => user.userId === viewedUserId)
         const viewedUserSocketID = viewedUser.id
 
-        io.to(viewedUserSocketID).emit('private-message', viewedUserId, myID.id, text);
-        socket.emit('private-message', viewedUserId, myID.id, text);
+        io.to(viewedUserSocketID).emit('private-message', viewedUserId, myID.id, text, time); // send it to the viewed user
+        socket.emit('private-message', viewedUserId, myID.id, text, time); // send it to myself
     })
 })
 
