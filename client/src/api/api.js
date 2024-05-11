@@ -178,3 +178,16 @@ export const sendMessage = async (token, receiverId, message) => {
 
     return response.data; // we will emit the message content using the socket in the frontend
 }
+
+export const getMessages = async (token, receiverId) => {
+    const validToken = await validateToken(token);
+    if (!validToken.valid) {
+        return null;
+    }
+
+    const senderId = validToken.user.id;
+    const params = new URLSearchParams({ senderId, receiverId });
+    const response = await API.get('/api/getMessages?' + params.toString());
+
+    return response.data;
+}

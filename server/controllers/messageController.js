@@ -30,8 +30,38 @@ const sendMessage = async (req, res) => {
     }
 }
 
+const getMessages = async (req, res) => {
+    try {
+        const { senderId, receiverId } = req.query;
 
+        // find messages between the sender and receiver and sort them by date
+        const messages = await Messages.find({
+            $or: [
+                { senderId: senderId, receiverId: receiverId },
+                { senderId: receiverId, receiverId: senderId }
+            ]
+        }).sort({ createdAt: 1 });
+
+        if (!messages) {
+            return res.status(400).json({
+                success: false,
+                message: "Unable to get messages"
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            data: messages
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+}
 
 module.exports = {
-    sendMessage
+    sendMessage,
+    getMessages
 }

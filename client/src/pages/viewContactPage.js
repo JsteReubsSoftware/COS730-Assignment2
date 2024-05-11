@@ -23,100 +23,7 @@ const ViewContactPage = () => {
     const [hasScrolled, setHasScrolled] = useState(false);
     const [viewedUser, setViewedUser] = useState(null);
     const [message, setMessage] = useState("");
-    const [messagesSent, setMessagesSent] = useState(
-        [
-            {
-              sender: '66392d2b172a67e84e1fa15a',
-              receiver: '662bfca7d0ed702985e5e27e',
-              content: 'Hey there! What are you up to?',
-              messageTime: 1652180540000 // Thursday, May 9 2024, 1:35:40 AM PST
-            },
-            {
-              sender: '662bfca7d0ed702985e5e27e',
-              receiver: '66392d2b172a67e84e1fa15a',
-              content: 'Just chilling, watching some Netflix. What about you?',
-              messageTime: 1652180600000 // Thursday, May 9 2024, 1:36:00 AM PST
-            },
-            {
-              sender: '66392d2b172a67e84e1fa15a',
-              receiver: '662bfca7d0ed702985e5e27e',
-              content: 'Same here! Picking a movie to watch now. Any recommendations?',
-              messageTime: 1652180660000 // Thursday, May 9 2024, 1:37:40 AM PST
-            },
-            {
-                sender: '66392d2b172a67e84e1fa15a',
-                receiver: '662bfca7d0ed702985e5e27e',
-                content: 'Hey there! What are you up to?',
-                messageTime: 1652180540000 // Thursday, May 9 2024, 1:35:40 AM PST
-              },
-              {
-                sender: '662bfca7d0ed702985e5e27e',
-                receiver: '66392d2b172a67e84e1fa15a',
-                content: 'Just chilling, watching some Netflix. What about you?',
-                messageTime: 1652180600000 // Thursday, May 9 2024, 1:36:00 AM PST
-              },
-              {
-                sender: '66392d2b172a67e84e1fa15a',
-                receiver: '662bfca7d0ed702985e5e27e',
-                content: 'Same here! Picking a movie to watch now. Any recommendations?',
-                messageTime: 1652180660000 // Thursday, May 9 2024, 1:37:40 AM PST
-              },
-              {
-                sender: '66392d2b172a67e84e1fa15a',
-                receiver: '662bfca7d0ed702985e5e27e',
-                content: 'Hey there! What are you up to?',
-                messageTime: 1652180540000 // Thursday, May 9 2024, 1:35:40 AM PST
-              },
-              {
-                sender: '662bfca7d0ed702985e5e27e',
-                receiver: '66392d2b172a67e84e1fa15a',
-                content: 'Just chilling, watching some Netflix. What about you?',
-                messageTime: 1652180600000 // Thursday, May 9 2024, 1:36:00 AM PST
-              },
-              {
-                sender: '66392d2b172a67e84e1fa15a',
-                receiver: '662bfca7d0ed702985e5e27e',
-                content: 'Same here! Picking a movie to watch now. Any recommendations?',
-                messageTime: 1652180660000 // Thursday, May 9 2024, 1:37:40 AM PST
-              },
-              {
-                sender: '66392d2b172a67e84e1fa15a',
-                receiver: '662bfca7d0ed702985e5e27e',
-                content: 'Hey there! What are you up to?',
-                messageTime: 1652180540000 // Thursday, May 9 2024, 1:35:40 AM PST
-              },
-              {
-                sender: '662bfca7d0ed702985e5e27e',
-                receiver: '66392d2b172a67e84e1fa15a',
-                content: 'Just chilling, watching some Netflix. What about you?',
-                messageTime: 1652180600000 // Thursday, May 9 2024, 1:36:00 AM PST
-              },
-              {
-                sender: '66392d2b172a67e84e1fa15a',
-                receiver: '662bfca7d0ed702985e5e27e',
-                content: 'Same here! Picking a movie to watch now. Any recommendations?',
-                messageTime: 1652180660000 // Thursday, May 9 2024, 1:37:40 AM PST
-              },
-              {
-                sender: '66392d2b172a67e84e1fa15a',
-                receiver: '662bfca7d0ed702985e5e27e',
-                content: 'Hey there! What are you up to?',
-                messageTime: 1652180540000 // Thursday, May 9 2024, 1:35:40 AM PST
-              },
-              {
-                sender: '662bfca7d0ed702985e5e27e',
-                receiver: '66392d2b172a67e84e1fa15a',
-                content: 'Just chilling, watching some Netflix. What about you?',
-                messageTime: 1652180600000 // Thursday, May 9 2024, 1:36:00 AM PST
-              },
-              {
-                sender: '66392d2b172a67e84e1fa15a',
-                receiver: '662bfca7d0ed702985e5e27e',
-                content: 'Same here! Picking a movie to watch now. Any recommendations?',
-                messageTime: 1652180660000 // Thursday, May 9 2024, 1:37:40 AM PST
-              }
-          ]
-    );
+    const [messagesSent, setMessagesSent] = useState([]);
 
     const handleSendMessage = async (event, text) => {
         const res = await API.sendMessage(Cookies.get('jwt'), viewedUser._id, text);
@@ -197,7 +104,19 @@ const ViewContactPage = () => {
                 const res = await API.getUserById(Cookies.get('jwt'), params.get('id'));
                 
                 if (res.user) {
-                  setViewedUser(res.user);
+                    setViewedUser(res.user);
+
+                    const newRes = await API.getMessages(Cookies.get('jwt'), res.user._id);
+
+                    if (newRes && newRes.success) {
+                        // format all the messages' times
+                        newRes.data.forEach(message => {
+                            message.messageTime = formatTime(message.messageTime);
+                        });
+                        setMessagesSent(newRes.data);
+                    } else if (newRes) {
+                        console.log(newRes.message);
+                    }
                 }
             };
     
@@ -215,12 +134,19 @@ const ViewContactPage = () => {
         socket.on('private-message', (receiver, sender, content, time) => {
             console.log('private-message received:', receiver, sender, content, time);
             const messageTime = formatTime(time);
-            setMessagesSent(messagesSent => [...messagesSent, { receiver, sender, content, messageTime }]);
+            setMessagesSent(messagesSent => [...messagesSent, 
+                {
+                    receiverId: receiver, 
+                    senderId: sender,
+                    text: content, 
+                    messageTime: messageTime 
+                }
+            ]);
         });
 
         return ( ) => { socket.off('disconnect') };
 
-    }, [ ]);
+    }, []);
 
     useEffect(() => {
         // Scroll to bottom whenever messages update
@@ -262,9 +188,9 @@ const ViewContactPage = () => {
             <div className="relative row-start-4 row-span-30 bg-opacity-80 bg-smoothWhite">
                 <div ref={messagesContainerRef} id="message-list" className="h-full w-full flex flex-col pt-3 overflow-y-scroll scroll-smooth">
                     {messagesSent.map((message, index) => (
-                        <div key={index} className={`px-3 py-1 w-fit h-auto my-1 mx-2 rounded-xl ${message.sender === viewedUser._id ? "self-start bg-slate-300" : "self-end bg-lightPurple"}`}>
-                            <div className="w-fit max-w-80 break-words">{message.content}</div>
-                            <div className={`${message.sender === viewedUser._id ? "text-smoothGrey" : "text-whitePurple"} text-[10px] font-bold text-end`}>{message.messageTime}</div>
+                        <div key={index} className={`px-3 py-1 w-fit h-auto my-1 mx-2 rounded-xl ${message.senderId === viewedUser._id ? "self-start bg-slate-300" : "self-end bg-lightPurple"}`}>
+                            <div className="w-fit max-w-80 break-words">{message.text}</div>
+                            <div className={`${message.senderId === viewedUser._id ? "text-smoothGrey" : "text-whitePurple"} text-[10px] font-bold text-end`}>{message.messageTime}</div>
                         </div>
                     ))}
                 </div>
