@@ -13,6 +13,12 @@ import { ImSpinner10 } from "react-icons/im";
 import { socket } from "../socket";
 
 const ViewContactPage = () => {  
+    if (!Cookies.get('jwt') || !socket) {
+        window.location.href = '/landing';
+    } else if (!socket.connected) {
+        socket.connect();
+    }
+
     const messagesContainerRef = useRef(null);
     const [hasScrolled, setHasScrolled] = useState(false);
     const [viewedUser, setViewedUser] = useState(null);
@@ -113,19 +119,22 @@ const ViewContactPage = () => {
     );
 
     const handleSendMessage = async (event, text) => {
-        // const res = await API.sendMessage(Cookies.get('jwt'), viewedUser._id, message);
+        const res = await API.sendMessage(Cookies.get('jwt'), viewedUser._id, text);
 
-        // if (res.success) {
-        //     setMessage("");
-        //     document.getElementById("message-input").blur();
+        if (res.success) {
+            setMessage("");
+            document.getElementById("message-input").focus();
+            document.getElementById("message-input").value = "";
 
-        //     // use socket to emit message
-        //     socket.emit('message', res.data.message);
-        // }
-        socket.emit('private-message', viewedUser._id, Cookies.get('jwt'), text, new Date().getTime());
-        const msgInput = document.getElementById("message-input"); 
-        msgInput.value = "";
-        msgInput.focus();
+            // use socket to emit message
+            socket.emit('private-message', res.data.receiverId, Cookies.get('jwt'), res.data.text, new Date(res.data.messageTime).getTime());
+        } else {
+            console.log(res.message);
+        }
+        // socket.emit('private-message', viewedUser._id, Cookies.get('jwt'), text, new Date().getTime());
+        // const msgInput = document.getElementById("message-input"); 
+        // msgInput.value = "";
+        // msgInput.focus();
 
         event.stopPropagation();
     }
@@ -144,6 +153,7 @@ const ViewContactPage = () => {
     //     const moreThanWeekTestTime = new Date().getTime() - (1000 * 60 * 60 * 24 * 8); // Subtract 8 days
 
         const messageTime = new Date(time); // Create a Date object from the timestamp
+        console.log(messageTime, time)
         const now = new Date(); // Get the current date and time
 
         // Calculate the difference in days between the message time and now
@@ -203,8 +213,9 @@ const ViewContactPage = () => {
         }
 
         socket.on('private-message', (receiver, sender, content, time) => {
-            console.log('private-message received:', receiver, sender, content, time); 
-            setMessagesSent(messagesSent => [...messagesSent, { receiver, sender, content, time }]);
+            console.log('private-message received:', receiver, sender, content, time);
+            const messageTime = formatTime(time);
+            setMessagesSent(messagesSent => [...messagesSent, { receiver, sender, content, messageTime }]);
         });
 
         return ( ) => { socket.off('disconnect') };
@@ -249,11 +260,11 @@ const ViewContactPage = () => {
                 </div>
             </div>
             <div className="relative row-start-4 row-span-30 bg-opacity-80 bg-smoothWhite">
-                <div ref={messagesContainerRef} id="message-list" className="h-full w-full flex flex-col pt-3 bg-red-500 overflow-y-scroll scroll-smooth">
+                <div ref={messagesContainerRef} id="message-list" className="h-full w-full flex flex-col pt-3 overflow-y-scroll scroll-smooth">
                     {messagesSent.map((message, index) => (
                         <div key={index} className={`px-3 py-1 w-fit h-auto my-1 mx-2 rounded-xl ${message.sender === viewedUser._id ? "self-start bg-slate-300" : "self-end bg-lightPurple"}`}>
                             <div className="w-fit max-w-80 break-words">{message.content}</div>
-                            <div className={`${message.sender === viewedUser._id ? "text-smoothGrey" : "text-whitePurple"} text-[10px] font-bold text-end`}>{formatTime(message.messageTime)}</div>
+                            <div className={`${message.sender === viewedUser._id ? "text-smoothGrey" : "text-whitePurple"} text-[10px] font-bold text-end`}>{message.messageTime}</div>
                         </div>
                     ))}
                 </div>

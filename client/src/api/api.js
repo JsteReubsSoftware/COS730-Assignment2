@@ -164,17 +164,17 @@ export const removeContact = async (token, contactEmail) => {
 }
 
 // ======== Message Service Endpoints =========
-export const sendMessage = async (token, text, receiverId) => {
+export const sendMessage = async (token, receiverId, message) => {
     const validToken = await validateToken(token);
     if (!validToken.valid) {
         return null;
     }
 
     const response = await API.post('/api/sendMessage', {
-        text,
+        text: message,
         receiverId,
         senderId: validToken.user.id
     });
 
-    return response; // we will emit the message content using the socket in the frontend
+    return response.data; // we will emit the message content using the socket in the frontend
 }

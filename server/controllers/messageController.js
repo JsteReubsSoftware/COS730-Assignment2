@@ -4,12 +4,19 @@ const Messages = require("../models/messageModel")
 
 const sendMessage = async (req, res) => {
     try {
-        const { text, senderId, receiverId } = req.body
+        const { text, receiverId, senderId } = req.body
         const newMessage = await Messages.create({
             text: text,
             senderId: senderId,
             receiverId: receiverId
         });
+
+        if (!newMessage) {
+            return res.status(400).json({
+                success: false,
+                message: "Unable to send message"
+            });
+        }
 
         res.status(200).json({
             success: true,

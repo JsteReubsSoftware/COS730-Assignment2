@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useGoogleLogin, googleLogout } from '@react-oauth/google';
 import * as API from "../api/api";
 import Cookies from 'js-cookie';
-import io from 'socket.io-client'
+import { socket } from '../socket';
 import { Link } from "react-router-dom";
 
 const LandingPage = () => {
@@ -15,6 +15,7 @@ const LandingPage = () => {
         setProfile(res['result']);
         const now = new Date();
         Cookies.set('jwt', res['token'], { expires: now.setDate(now.getDate() + 1) });
+        socket.connect();
       }
       loginRequest()
     },
@@ -29,6 +30,7 @@ const LandingPage = () => {
     setProfile(null);
     localStorage.clear();
     Cookies.remove('jwt');
+    socket.disconnect();
   };
 
     useEffect(() => {

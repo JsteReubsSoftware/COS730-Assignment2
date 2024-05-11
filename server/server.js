@@ -55,10 +55,16 @@ io.on('connection', (socket) => {
     
     console.log('user connected')
 
-    socket.on('user-connected', () => {
+    socket.on('user-connected', (token) => {
+        if (!token) {
+            // disconnect
+            socket.disconnect()
+            return
+        }
+
         usersConnected.push({
             id: socket.id,
-            userId: jwt.decode(socket.handshake.headers['token']).id,
+            userId: jwt.decode(token).id,
             token: socket.handshake.headers['token']
         })
     })
