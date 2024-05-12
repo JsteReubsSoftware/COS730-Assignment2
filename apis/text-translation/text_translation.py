@@ -6,7 +6,7 @@ from googletrans import Translator
 app = Flask(__name__)
 api = Api(app)
 swagger = Swagger(app)
-translator = Translator(service_urls=['translate.googleapis.com'])
+translator = Translator()
 
 LANGUAGES = {
     'af': 'afrikaans',
