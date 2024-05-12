@@ -60,7 +60,6 @@ const ViewContactPage = () => {
     //     const moreThanWeekTestTime = new Date().getTime() - (1000 * 60 * 60 * 24 * 8); // Subtract 8 days
 
         const messageTime = new Date(time); // Create a Date object from the timestamp
-        console.log(messageTime, time)
         const now = new Date(); // Get the current date and time
 
         // Calculate the difference in days between the message time and now
@@ -131,8 +130,15 @@ const ViewContactPage = () => {
             window.location.href = "/landing";
         }
 
-        socket.on('private-message', (receiver, sender, content, time) => {
-            console.log('private-message received:', receiver, sender, content, time);
+        socket.on('private-message', async (receiver, sender, content, time) => {
+            // translate message to our preferred language
+            // const res = await API.translateMessage(Cookies.get('jwt'), content);
+
+            // if (res && !res.success) {
+            //     console.log(res.message);
+            //     return;
+            // }
+
             const messageTime = formatTime(time);
             setMessagesSent(messagesSent => [...messagesSent, 
                 {

@@ -85,9 +85,14 @@ io.on('connection', (socket) => {
 
         // get viewed user
         const viewedUser = usersConnected.find(user => user.userId === viewedUserId)
-        const viewedUserSocketID = viewedUser.id
+        
+        if (viewedUser) {
+            const viewedUserSocketID = viewedUser.id
 
-        io.to(viewedUserSocketID).emit('private-message', viewedUserId, myID.id, text, time); // send it to the viewed user
+            io.to(viewedUserSocketID).emit('private-message', viewedUserId, myID.id, text, time); // send it to the viewed user
+        }
+
+        // send it to myself
         socket.emit('private-message', viewedUserId, myID.id, text, time); // send it to myself
     })
 })

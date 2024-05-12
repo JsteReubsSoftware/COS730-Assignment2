@@ -40,6 +40,7 @@ const LandingPage = () => {
           
           if (res.user) {
             setProfile(res.user);
+            socket.connect();
           }
         }
 

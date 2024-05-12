@@ -191,3 +191,16 @@ export const getMessages = async (token, receiverId) => {
 
     return response.data;
 }
+
+export const translateMessage = async (token, text) => {
+    const validToken = await validateToken(token);
+    if (!validToken.valid) {
+        return null;
+    }
+
+    const receiverId = validToken.user.id;
+    const params = new URLSearchParams({ text,  receiverId });
+    const response = await API.get('/api/translateMessage?' + params.toString());
+
+    return response.data;
+}
