@@ -176,8 +176,57 @@ class TranslateText(Resource):
         translation = translator.translate(text, src=source_language, dest=target_language)
 
         return jsonify({"text": translation.text})
+    
+class DetectLanguage(Resource):
+
+    def get(self):
+        """
+        This method responds to the GET request for this endpoint and returns the detected language of the text
+        ---
+        tags:
+        - Text Processing
+        parameters:
+            - name: text
+              in: query
+              type: string
+              required: true
+              description: The text to be analyzed
+        responses:
+            200:
+                description: A successful GET request
+                content:
+                    application/json:
+                      schema:
+                        type: object
+                        properties:
+                            language:
+                                type: string
+                                description: The detected language of the text
+            400:
+                description: Bad request
+                content:
+                    application/json:
+                      schema:
+                        type: object
+                        properties:
+                            error:
+                                type: string
+                                description: Unsupported source or target language
+        """
+        text = request.args.get('text')
+
+        # Check if both source and target languages are supported by the translator
+
+        try:
+            detected_language = translator.detect(text).lang
+
+            return jsonify({"language": detected_language})
+
+        except Exception as e:
+            return {"error": str(e)}, 400    
 
 api.add_resource(TranslateText, "/translate")
+api.add_resource(DetectLanguage, "/detect")
 
 if __name__ == "__main__":
     app.run(debug=True)

@@ -25,7 +25,8 @@ const loginController = async(req, res) => {
                 const newUser = await User.create({
                     name: `${firstName} ${lastName}`,
                     email: email,
-                    profileImg: picture
+                    profileImg: picture,
+                    secureToken: access_token
                 })
 
                 const token = jwt.sign({
@@ -80,7 +81,7 @@ const verifyToken = async (req, res) => {
             return res.json({success: true, data: {valid: false, message: "Invalid token.", error: err}});
         }
 
-        return res.json({success: true, data: {valid: true, message: "Token is valid."}});
+        return res.json({success: true, data: {valid: true, user: jwt.decode(token), message: "Token is valid."}});
     });
 }
 

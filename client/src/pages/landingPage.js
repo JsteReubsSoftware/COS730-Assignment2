@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useGoogleLogin, googleLogout } from '@react-oauth/google';
 import * as API from "../api/api";
 import Cookies from 'js-cookie';
+import { socket } from '../socket';
+import { Link } from "react-router-dom";
 
 const LandingPage = () => {
   const [ profile, setProfile ] = useState(null);
@@ -10,11 +12,10 @@ const LandingPage = () => {
     onSuccess: (credentialResponse) => {
       const loginRequest = async () => {
         const res = await API.logInGoogle(credentialResponse.access_token);
-        localStorage.setItem('profile', JSON.stringify(res['result']));
-        localStorage.setItem('expiresAt', JSON.stringify(credentialResponse.expires_in));
         setProfile(res['result']);
         const now = new Date();
         Cookies.set('jwt', res['token'], { expires: now.setDate(now.getDate() + 1) });
+        socket.connect();
       }
       loginRequest()
     },
@@ -29,19 +30,21 @@ const LandingPage = () => {
     setProfile(null);
     localStorage.clear();
     Cookies.remove('jwt');
+    socket.disconnect();
   };
 
     useEffect(() => {
       if (Cookies.get('jwt')) {
-        const validToken = async () => {
-          const isValid = await API.validateToken(Cookies.get('jwt'));
-          console.log(isValid.valid);
-          if (isValid.valid) {
-            setProfile(JSON.parse(localStorage.getItem('profile')));
+        const getUser = async () => {
+          const res = await API.getUserByEmail(Cookies.get('jwt'));
+          
+          if (res.user) {
+            setProfile(res.user);
+            socket.connect();
           }
         }
 
-        validToken();
+        getUser();
       }
 
     },[]);
@@ -62,7 +65,7 @@ const LandingPage = () => {
               </div>
               <button onClick={logout} className="text-red-500">Log out</button>
             </div>
-            <button onClick={() => window.location.href = "/contacts"} className="m-auto border-2 bg-darkPurple rounded-md p-5 text-center text-smoothWhite font-bold hover:cursor-pointer">Go to Home Page</button>
+            <Link to='/contacts' className="m-auto border-2 bg-darkPurple rounded-md p-5 text-center text-smoothWhite font-bold hover:cursor-pointer">Go to Home Page</Link>
           </>
         ) : (
           <div onClick={login} className="m-auto border-2 bg-darkPurple rounded-md p-5 text-center text-smoothWhite font-bold hover:cursor-pointer">Sign in with Google 🚀 </div>

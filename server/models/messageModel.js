@@ -14,6 +14,10 @@ const messageSchema = mongoose.Schema(
         receiverId: {
             type: String,
             required: true
+        },
+        messageTime: {
+            type: Date,
+            default: Date.now
         }
     },
     {

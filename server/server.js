@@ -4,6 +4,8 @@ const mongoose = require('mongoose')
 const cors = require('cors')
 const app = express()
 const chatServer = http.createServer(app)
+const jwt = require('jsonwebtoken')
+const Cookies = require('js-cookie')
 
 const allowedOrigins = [
     'https://rj-automated-api-app.onrender.com',
@@ -23,6 +25,10 @@ const io = require('socket.io')(chatServer, {
     }
 })
 
+app.get('/', (req, res) => {
+    res.sendFile(join(__dirname, 'index.html'));
+});
+
 app.use(cors())
 app.use(express.json())
 app.use(express.urlencoded({extended: false}))
@@ -33,12 +39,61 @@ app.use("/api", require("./routes/userRoutes"))
 app.use("/api", require("./routes/messageRoutes"))
 
 // ---------------------------------------------------
+const verifyToken = (token) => {
+    // Replace with your token verification logic using your secret key
+    try {
+        const decoded = jwt.verify(token, process.env.REACT_APP_JWT_SECRET_KEY);
+        return decoded; // Return decoded user information if valid
+    } catch (error) {
+        return false; // Invalid token
+    }
+};
+
+var usersConnected = []
 
 io.on('connection', (socket) => {
+    
     console.log('user connected')
+
+    socket.on('user-connected', (token) => {
+        if (!token) {
+            // disconnect
+            socket.disconnect()
+            return
+        }
+
+        usersConnected.push({
+            id: socket.id,
+            userId: jwt.decode(token).id,
+            token: socket.handshake.headers['token']
+        })
+    })
 
     socket.on('disconnect', () => {
         console.log('user disconnected')
+
+        usersConnected = usersConnected.filter(user => user.id !== socket.id)
+    })
+
+    socket.on('logout', () => {
+        socket.disconnect()
+    })
+
+    socket.on('private-message', (viewedUserId, token, text, time) => {
+        // extract id from token
+        const myID = jwt.decode(token)
+
+        // get viewed user
+        const viewedUser = usersConnected.find(user => user.userId === viewedUserId)
+        
+        if (viewedUser) {
+            const viewedUserSocketID = viewedUser.id
+
+            io.to(viewedUserSocketID).emit('private-message', viewedUserId, myID.id, text, time); // send it to the viewed user
+        }
+
+        // send it to myself
+        socket.emit('private-message', viewedUserId, myID.id, text, time); // send it to myself
     })
 })
 
