@@ -10,9 +10,9 @@ swagger = Swagger(app)
 
 class SentimentAnalyser(Resource):
 
-    def post(self):
+    def get(self):
         """
-        This method responds to the POST request for this endpoint and returns the sentiment of the text
+        This method responds to the GET request for this endpoint and returns the sentiment of the text
         ---
         tags:
         - Sentiment Analysis
