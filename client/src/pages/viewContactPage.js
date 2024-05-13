@@ -25,6 +25,7 @@ const ViewContactPage = () => {
     const [message, setMessage] = useState("");
     const [messagesSent, setMessagesSent] = useState([]);
     const [messagesLoaded, setMessagesLoaded] = useState(false);
+    // eslint-disable-next-line
     const [timerId, setTimerId] = useState(null);
     const [spinnerText, setSpinnerText] = useState("Loading...");
 
@@ -66,6 +67,7 @@ const ViewContactPage = () => {
         const now = new Date(); // Get the current date and time
 
         // Calculate the difference in days between the message time and now
+        //eslint-disable-next-line
         const daysDifference = Math.floor((now - messageTime) / (1000 * 60 * 60 * 24));
 
         let formattedTime;
@@ -191,10 +193,11 @@ const ViewContactPage = () => {
         const daysDifference = Math.floor((now - messageTime) / (1000 * 60 * 60 * 24));
 
         let formattedTime;
+        //eslint-disable-next-line
         const hours = messageTime.getHours();
-        const minutes = messageTime.getMinutes().toString().padStart(2, '0'); // Pad minutes with leading zero if needed
-        const amPm = hours >= 12 ? 'PM' : 'AM';
-        const formattedHours = hours % 12 || 12; // Convert to 12-hour format (12 for midnight)
+        // const minutes = messageTime.getMinutes().toString().padStart(2, '0'); // Pad minutes with leading zero if needed
+        // const amPm = hours >= 12 ? 'PM' : 'AM';
+        // const formattedHours = hours % 12 || 12; // Convert to 12-hour format (12 for midnight)
 
         if (daysDifference === 0) {
             // Today
