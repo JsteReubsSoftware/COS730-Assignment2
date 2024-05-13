@@ -9,9 +9,28 @@ const sendMessage = async (req, res) => {
     try {
         const { text, receiverId, senderId } = req.body
         // detect language of text and translate it to English
+        const detect_response = await axios.get('https://rj-text-translation.onrender.com/detect?' + new URLSearchParams({text: text}).toString());
+
+        if (!detect_response.data) {
+            return res.status(400).json({
+                success: false,
+                message: "Unable to detect language of message"
+            });
+        }
+
+        const source_lang = detect_response.data.language;
+        const translate_params = {'text': text, 'source_language': source_lang, 'target_language': 'en'};
+
+        const translate_response = await axios.get('https://rj-text-translation.onrender.com/translate?' + new URLSearchParams(translate_params).toString());
+        if (!translate_response) {
+            return res.status(400).json({
+                success: false,
+                message: "Unable to translate message"
+            });
+        }
 
         const newMessage = await Messages.create({
-            text: text,
+            text: translate_response.data.text,
             senderId: senderId,
             receiverId: receiverId
         });
@@ -116,8 +135,21 @@ const translateMessage = async (req, res) => {
             });
         }
 
+        // detect language of text and translate it to target language
+
+        const detect_response = await axios.get('https://rj-text-translation.onrender.com/detect?' + new URLSearchParams({text: text}).toString());
+
+        if (!detect_response) {
+            return res.status(400).json({
+                success: false,
+                message: "Unable to detect language when translating message"
+            });
+        }
+
+        const source_lang = detect_response.data.language;
+
         const receiverLang = response.data.data.user.language;
-        const translate_params = {'text': text, 'source_language': 'en', 'target_language': receiverLang};
+        const translate_params = {'text': text, 'source_language': source_lang, 'target_language': receiverLang};
 
         const translate_response = await axios.get('https://rj-text-translation.onrender.com/translate?' + new URLSearchParams(translate_params).toString());
         if (translate_response) {
