@@ -208,7 +208,22 @@ const removeContact = async (req, res) => {
             return res.status(404).json({success: false, data: { user: null, message: "User with provided email not found" }});
         }
 
-        return res.status(200).json({success: true, data: { user: user, message: "User found and contact removed" }});
+        // also remove all messages exhanges between users if the other user does not exist
+
+        // check if user exists
+        const otherUser = await User.findOne({email: contactEmail});
+
+        if (otherUser) {
+            return res.status(200).json({success: true, data: { user: user, message: "User found and contact removed. No need to clear chat history." }});
+        }
+
+        const messages = await Messages.deleteMany({$or: [{senderId: contactEmail, receiverId: myEmail}, {senderId: myEmail, receiverId: contactEmail}]});
+
+        if (!messages) {
+            return res.status(404).json({success: false, data: { user: null, message: "User found and contact removed but unable to clear messages" }});
+        }
+
+        return res.status(200).json({success: true, data: { user: user, message: "User found and contact removed and chat history cleared" }});
 
     } catch(error) {
         return res.status(500).json({success: false, data: {message: error.message}});

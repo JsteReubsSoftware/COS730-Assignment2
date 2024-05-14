@@ -1,5 +1,5 @@
 import { MdAddBox } from "react-icons/md";
-import { IoFilter } from "react-icons/io5";
+import { MdIndeterminateCheckBox } from "react-icons/md";
 import { ImSpinner10 } from "react-icons/im";
 import { FaInbox } from "react-icons/fa";
 
@@ -13,6 +13,7 @@ import * as API from "../api/api";
 import AddContactModal from "../components/addContactModal";
 
 import { socket } from "../socket";
+import DeleteContactModal from "../components/deleteContactModal";
 
 const ContactsPage = () => {
     
@@ -24,10 +25,22 @@ const ContactsPage = () => {
 
     const [contacts, setContacts] = useState(null);
     const [filteredContacts, setFilteredContacts] = useState(null); 
-    const [showModal, setShowModal] = useState(false);
+    const [showModalAdd, setShowModalAdd] = useState(false);
+    const [showModalDelete, setShowModalDelete] = useState(false);
 
     const addNewContact = async (updatedContacts) => {
         setContacts(updatedContacts);
+        setFilteredContacts(updatedContacts);
+        document.querySelector('#search-bar').value = '';
+        document.querySelector('#search-bar').blur();
+        console.log(updatedContacts);
+    }
+
+    const deleteContact = async (updatedContacts) => {
+        setContacts(updatedContacts);
+        setFilteredContacts(updatedContacts);
+        document.querySelector('#search-bar').value = '';
+        document.querySelector('#search-bar').blur();
         console.log(updatedContacts);
     }
 
@@ -38,7 +51,8 @@ const ContactsPage = () => {
     }
 
     const handleClose = (message) => {
-        setShowModal(false);
+        setShowModalAdd(false);
+        setShowModalDelete(false);
 
         if (message) {
             notify(message);
@@ -74,13 +88,13 @@ const ContactsPage = () => {
                     <span className="my-auto ml-2 font-irishGrover">Yahoo! Messenger</span>
                 </div>
                 <div className="flex justify-between mt-2">
-                    <input type="text" placeholder="Search contacts" className="mx-3 mt-2 my-auto w-full focus:outline-none focus:border-darkPurple border-2 border-lightPurple rounded-xl px-2 py-1" onChange={(e) => handleSearch(e.target.value)} />
+                    <input id='search-bar' type="text" placeholder="Search contacts" className="mx-3 mt-2 my-auto w-full focus:outline-none focus:border-darkPurple border-2 border-lightPurple rounded-xl px-2 py-1" onChange={(e) => handleSearch(e.target.value)} />
                     <div className="w-1/2 flex justify-evenly">
                         <div className="bg-smoothWhite">
-                            <MdAddBox className="w-full h-full text-darkPurple text-[40px]" onClick={() => (setShowModal(!showModal))}/>
+                            <MdAddBox className="w-full h-full text-darkPurple text-[40px]" onClick={() => (setShowModalAdd(!showModalAdd))}/>
                         </div>
-                        <div className="bg-smoothWhite opacity-50">
-                            <IoFilter className="w-full h-full text-darkPurple text-[40px]"/>
+                        <div className="bg-smoothWhite">
+                            <MdIndeterminateCheckBox className="w-full h-full text-darkPurple text-[40px]" onClick={() => (setShowModalDelete(!showModalDelete))}/>
                         </div> 
                     </div>
                 </div>
@@ -106,9 +120,13 @@ const ContactsPage = () => {
                 }
             </div>
             {/* render the contact view page if the screen size allows it */}
-            {showModal && 
+            {showModalAdd && 
                 <div className="absolute w-full h-full bg-smoothGrey bg-opacity-50 z-10 flex justify-center px-10 py-60">
-                    <AddContactModal isOpen={showModal} onClose={(message) => handleClose(message)} updateContacts={(updatedContacts) => addNewContact(updatedContacts)} />
+                    <AddContactModal isOpen={showModalAdd} onClose={(message) => handleClose(message)} updateContacts={(updatedContacts) => addNewContact(updatedContacts)} />
+                </div>}
+            {showModalDelete && 
+                <div className="absolute w-full h-full bg-smoothGrey bg-opacity-50 z-10 flex justify-center px-10 py-60">
+                    <DeleteContactModal isOpen={showModalDelete} onClose={(message) => handleClose(message)} updateContacts={(updatedContacts) => deleteContact(updatedContacts)} />
                 </div>}
         </div>
     ) : (

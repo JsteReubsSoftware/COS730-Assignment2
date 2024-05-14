@@ -108,7 +108,10 @@ const ContactCard = ({ contact }) => {
                 <img src={contact.profileImg} alt="profile" className="rounded-full w-full h-full "/>
             </div>
             <div className="col-start-3 col-span-5 flex flex-col pl-3 justify-evenly">
-                <div className="">{contact.name}</div>
+                <div>
+                    <div className="">{contact.name}</div>
+                    <div className="text-xs text-smoothGrey">{contact.email}</div>
+                </div>
                 <div className="flex">
                     <GoDotFill className={`my-auto ${userStatus ? "text-green-400" : "text-smoothGrey"}`}/>
                     <span className={`text-sm my-auto ${userStatus ? "text-green-400" : "text-smoothGrey"}`}>{userStatus ? 'Online' : 'Offline'}</span>
