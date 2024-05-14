@@ -288,7 +288,7 @@ const ViewContactPage = () => {
                     </div>
                 </div>
                 <div className="col-start-11 col-span-2">
-                    <MdCall className=" text-smoothWhite text-4xl h-full mx-auto" />
+                    <MdCall className=" text-smoothWhite text-4xl h-full mx-auto opacity-50" />
                 </div>
             </div>
             <div className="relative row-start-4 row-span-30 bg-opacity-80 bg-smoothWhite">

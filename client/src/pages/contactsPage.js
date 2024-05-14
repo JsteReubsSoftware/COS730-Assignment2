@@ -1,6 +1,7 @@
 import { MdAddBox } from "react-icons/md";
 import { IoFilter } from "react-icons/io5";
 import { ImSpinner10 } from "react-icons/im";
+import { FaInbox } from "react-icons/fa";
 
 import ContactCard from "../components/contactCard";
 import { useEffect, useState } from "react";
@@ -21,7 +22,8 @@ const ContactsPage = () => {
         socket.connect();
     }
 
-    const [contacts, setContacts] = useState(null); 
+    const [contacts, setContacts] = useState(null);
+    const [filteredContacts, setFilteredContacts] = useState(null); 
     const [showModal, setShowModal] = useState(false);
 
     const addNewContact = async (updatedContacts) => {
@@ -43,11 +45,18 @@ const ContactsPage = () => {
         }
     }
 
+    const handleSearch = (searchValue) => {
+        //filter contacts based on search value
+
+        setFilteredContacts(contacts.filter(contact => contact.name.toLowerCase().includes(searchValue.toLowerCase())))
+    }
+
     useEffect(() => {
         async function fetchContacts() {
             const res = await API.getUserContacts(Cookies.get('jwt'));
             
             setContacts(res.data.contacts);
+            setFilteredContacts(res.data.contacts);
         }
 
         fetchContacts();
@@ -65,12 +74,12 @@ const ContactsPage = () => {
                     <span className="my-auto ml-2 font-irishGrover">Yahoo! Messenger</span>
                 </div>
                 <div className="flex justify-between mt-2">
-                    <input type="text" placeholder="Search contacts" className="mx-3 mt-2 my-auto w-full focus:outline-none focus:border-darkPurple border-2 border-lightPurple rounded-xl px-2 py-1" />
+                    <input type="text" placeholder="Search contacts" className="mx-3 mt-2 my-auto w-full focus:outline-none focus:border-darkPurple border-2 border-lightPurple rounded-xl px-2 py-1" onChange={(e) => handleSearch(e.target.value)} />
                     <div className="w-1/2 flex justify-evenly">
                         <div className="bg-smoothWhite">
                             <MdAddBox className="w-full h-full text-darkPurple text-[40px]" onClick={() => (setShowModal(!showModal))}/>
                         </div>
-                        <div className="bg-smoothWhite">
+                        <div className="bg-smoothWhite opacity-50">
                             <IoFilter className="w-full h-full text-darkPurple text-[40px]"/>
                         </div> 
                     </div>
@@ -79,9 +88,21 @@ const ContactsPage = () => {
             <div className="w-full h-full pb-5 overflow-auto flex flex-col row-start-6 row-span-29">
                 {
                     // render the contact cards
-                    contacts.map((contact) => (
+                    filteredContacts && filteredContacts.length > 0 && filteredContacts.map((contact) => (
                         <ContactCard key={contact._id} contact={contact} />
                     ))
+                }
+                { contacts && contacts.length === 0 && 
+                    <div className="m-auto text-center">
+                        <FaInbox className="text-darkPurple w-full h-full" />
+                        <span className="text-darkPurple">You have no contacts</span>
+                    </div>
+                }
+                { contacts && contacts.length > 0 && filteredContacts && filteredContacts.length === 0 && 
+                    <div className="m-auto text-center">
+                        <FaInbox className="text-darkPurple w-full h-full" />
+                        <span className="text-darkPurple w-full">No contacts found</span>
+                    </div>
                 }
             </div>
             {/* render the contact view page if the screen size allows it */}

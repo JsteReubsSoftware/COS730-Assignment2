@@ -47,7 +47,7 @@ const ContactCard = ({ contact }) => {
           return `${minutesDiff} min ago`;
         } else if (secondsDiff < oneDay) {
           const hoursDiff = Math.floor(secondsDiff / oneHour);
-          return `${hoursDiff} hour(s)ago`;
+          return `${hoursDiff === 1 ? "1 hour ago" : " hours ago"}`;
         } else if (secondsDiff < oneDay * 2) {  // Check for yesterday within 24 hours
           return `Yesterday at ${messageTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
         } else {
