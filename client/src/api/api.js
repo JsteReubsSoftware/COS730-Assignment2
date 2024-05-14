@@ -204,3 +204,16 @@ export const translateMessage = async (token, text) => {
 
     return response.data;
 }
+
+export const censorText = async (token, text) => {
+    const validToken = await validateToken(token);
+    if (!validToken.valid) {
+        return null;
+    }
+
+    const receiverId = validToken.user.id;
+    const params = new URLSearchParams({ text,  receiverId });
+    const response = await API.get('/api/censorText?' + params.toString());
+
+    return response.data;
+}
