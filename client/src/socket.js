@@ -1,6 +1,5 @@
 import io from 'socket.io-client'
 import Cookies from 'js-cookie'
-// export const socket = io.connect("https://rj-automated-api.onrender.com");
 
 class SocketClient {
   constructor(serverUrl) {
@@ -50,4 +49,4 @@ class SocketClient {
 }
 
 // Usage in other components:
-export const socket = new SocketClient(`ws://localhost:${process.env.REACT_APP_SERVER_PORT}`);
+export const socket = new SocketClient("https://rj-automated-api.onrender.com");
