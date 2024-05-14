@@ -114,13 +114,13 @@ const updateUserBlurText = async (req, res) => {
         const count = await User.countDocuments();
 
         if (count === 0) {
-            return res.status(404).json({success: false, data: {message: "Unable to update censoreText field. No users found."}});
+            return res.status(404).json({success: false, data: {message: "Unable to update censorText field. No users found."}});
         }
 
-        const user = await User.findOneAndUpdate({email: email}, {censoreText: blurTextBoolean}, {new: true});
+        const user = await User.findOneAndUpdate({email: email}, {censorText: blurTextBoolean}, {new: true});
 
         if (!user) {
-            return res.status(404).json({success: false, data: {message: "Unable to update censoreText field. User with provided email not found."}});
+            return res.status(404).json({success: false, data: {message: "Unable to update censorText field. User with provided email not found."}});
         }
 
         return res.status(200).json({success: true, data: {user}});
@@ -136,13 +136,13 @@ const updateUsername = async (req, res) => {
         const count = await User.countDocuments();
 
         if (count === 0) {
-            return res.status(404).json({success: false, data: {message: "Unable to update censoreText field. No users found."}});
+            return res.status(404).json({success: false, data: {message: "Unable to update censorText field. No users found."}});
         }
 
         const user = await User.findOneAndUpdate({email: email}, {name: username}, {new: true});
 
         if (!user) {
-            return res.status(404).json({success: false, data: {message: "Unable to update censoreText field. User with provided email not found."}});
+            return res.status(404).json({success: false, data: {message: "Unable to update censorText field. User with provided email not found."}});
         }
 
         return res.status(200).json({success: true, data: {user}});

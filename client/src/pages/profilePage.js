@@ -70,12 +70,12 @@ const ProfilePage = () => {
         const userRes = await API.getUserByEmail(Cookies.get('jwt'));
                 
         if (userRes.user) {
-            const res = await API.updateUserBlurText(Cookies.get('jwt'), !userRes.user.censoreText, userRes.user.email);
+            const res = await API.updateUserBlurText(Cookies.get('jwt'), !userRes.user.censorText, userRes.user.email);
 
             if (res && res.success) {
-                setBlurText(res.data.user.censoreText);
+                setBlurText(res.data.user.censorText);
 
-                notify('Censore Text Preference Updated');
+                notify('Censor Text Preference Updated');
             }
         }
     }
@@ -106,7 +106,7 @@ const ProfilePage = () => {
                 
                 if (res.user) {
                   setLanguage(res.user.language);
-                  setBlurText(res.user.censoreText);
+                  setBlurText(res.user.censorText);
                   setUsername(res.user.name);
                   setPrevUsername(res.user.name);
                 }

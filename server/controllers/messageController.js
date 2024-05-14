@@ -84,6 +84,19 @@ const getMessages = async (req, res) => {
             });
         }
 
+        // sentiment analyse text
+        if (response.data.data.user && response.data.data.user.censorText) {
+            for (let message of messages) {
+                const sentiment_response = await axios.get('https://rj-sentiment-analysis.onrender.com/sentiment?' + new URLSearchParams({text: message.text}).toString());
+
+                if (sentiment_response) {
+                    message.text = sentiment_response.data.censored_text
+                }
+            }
+        }
+
+        // Translate text
+
         const senderLang = response.data.data.user.language;
 
         let base_url = 'https://rj-text-translation.onrender.com/translate'
@@ -166,8 +179,62 @@ const translateMessage = async (req, res) => {
     }
 }
 
+const censorText = async (req, res) => {
+    try {
+        const { text, receiverId } = req.query;
+
+        if (!text || !receiverId) {
+            return res.status(400).json({
+                success: false,
+                message: "Missing required parameters when censoring text"
+            });
+        }
+
+        const search_params = new URLSearchParams({ id: receiverId });
+        const response = await API.get('/api/getUserById?' + search_params.toString());
+
+        if (response.data && !response.data.success) {
+            return res.status(400).json({
+                success: false,
+                message: "Unable to identify receiver when censoring text"
+            });
+        } else if (!response.data) {
+            return res.status(400).json({
+                success: false,
+                message: "Receiver not found when censoring text"
+            });
+        }
+
+        const receiverCensorText = response.data.data.user.censorText;
+
+        if (receiverCensorText) {
+            // censor text
+
+            const censor_response = await axios.get('https://rj-sentiment-analysis.onrender.com/sentiment?' + new URLSearchParams({text: text}).toString());
+
+            if (censor_response) {
+                res.status(200).json({
+                    success: true,
+                    data: censor_response.data
+                });
+            }
+        } else {
+            res.status(200).json({
+                success: true,
+                data: {text: text}
+            });
+        }
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }    
+}
+
 module.exports = {
     sendMessage,
     getMessages,
-    translateMessage
+    translateMessage,
+    censorText
 }
