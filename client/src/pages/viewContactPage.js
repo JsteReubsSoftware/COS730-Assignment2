@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, Fragment } from "react";
 import Cookies from 'js-cookie';
 import * as API from "../api/api";
 
@@ -152,16 +152,28 @@ const ViewContactPage = () => {
             //     return;
             // }
 
-            const formattedTime = formatTime(time);
-            setMessagesSent(messagesSent => [...messagesSent, 
-                {
-                    receiverId: receiver, 
-                    senderId: sender,
-                    text: content, 
-                    messageTime: time,
-                    formattedTime: formattedTime 
-                }
-            ]);
+            //censor text
+            const res = await API.censorText(Cookies.get('jwt'), content);
+
+            if (res && !res.success) {
+                console.log(res.message);
+                return;
+            }
+
+            content = res.data.censored_text;
+
+            if (content) {
+                const formattedTime = formatTime(time);
+                setMessagesSent(messagesSent => [...messagesSent, 
+                    {
+                        receiverId: receiver, 
+                        senderId: sender,
+                        text: content, 
+                        messageTime: time,
+                        formattedTime: formattedTime 
+                    }
+                ]);
+            }
         });
 
         return ( ) => { socket.off('disconnect') };
@@ -247,20 +259,20 @@ const ViewContactPage = () => {
                 </div>
             </div>
             <div className="relative row-start-4 row-span-30 bg-opacity-80 bg-smoothWhite">
-                <div ref={messagesContainerRef} id="message-list" className="h-full w-full flex flex-col pt-3 overflow-y-scroll scroll-smooth">
+                <div key={0} ref={messagesContainerRef} id="message-list" className="h-full w-full flex flex-col pt-3 overflow-y-scroll scroll-smooth">
                     {messagesSent.map((message, index) => {
                         return (
-                            <>
+                            <Fragment key={`${message.formattedTime + index + viewedUser._id}`}>
                                 {index !== messagesSent.length - 1 && getDateLabel(message.messageTime) !== getDateLabel(messagesSent[index + 1].messageTime) && (
-                                    <div className="text-smoothWhite text-sm bg-lightPurple rounded-lg mx-auto p-1">
+                                    <div key={message.formattedTime + `${index}`} className="text-smoothWhite text-sm bg-lightPurple rounded-lg mx-auto p-1">
                                         {getDateLabel(message.messageTime)}
                                     </div>
                                 )}
-                                <div className={`px-3 py-1 w-fit h-auto my-1 mx-2 rounded-xl ${message.senderId === viewedUser._id ? "self-start bg-slate-300" : "self-end bg-lightPurple"}`}>
+                                <div key={`${message.messageTime} + ${index}`} className={`px-3 py-1 w-fit h-auto my-1 mx-2 rounded-xl ${message.senderId === viewedUser._id ? "self-start bg-slate-300" : "self-end bg-lightPurple"}`}>
                                     <div className="w-fit max-w-80 break-words">{message.text}</div>
                                     <div className={`${message.senderId === viewedUser._id ? "text-smoothGrey" : "text-whitePurple"} text-[10px] font-bold text-end`}>{message.formattedTime}</div>
                                 </div>
-                            </>
+                            </ Fragment>
                         );
                     })}
                 </div>

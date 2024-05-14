@@ -19,7 +19,7 @@ const usersSchema = mongoose.Schema(
             required: true,
             default: 'en'
         },
-        censoreText: {
+        censorText: {
             type: Boolean,
             required: true,
             default: false
