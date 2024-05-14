@@ -11,7 +11,16 @@ import 'react-toastify/dist/ReactToastify.css';
 import * as API from "../api/api";
 import AddContactModal from "../components/addContactModal";
 
+import { socket } from "../socket";
+
 const ContactsPage = () => {
+    
+    if (!Cookies.get('jwt') || !socket) {
+        window.location.href = '/landing';
+    } else if (!socket.connected) {
+        socket.connect();
+    }
+
     const [contacts, setContacts] = useState(null); 
     const [showModal, setShowModal] = useState(false);
 
@@ -42,6 +51,8 @@ const ContactsPage = () => {
         }
 
         fetchContacts();
+
+        socket.emit('get-users');
 
     }, []);
 
