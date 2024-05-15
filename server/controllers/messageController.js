@@ -2,7 +2,8 @@ const jwt = require("jsonwebtoken")
 const axios = require("axios")
 const Messages = require("../models/messageModel")
 
-const API = axios.create({baseURL:"https://rj-automated-api.onrender.com"})
+const API = axios.create({baseURL:"http://localhost:3000"})
+// const API = axios.create({baseURL:"https://rj-automated-api.onrender.com"})
 
 const sendMessage = async (req, res) => {
     try {
@@ -220,7 +221,7 @@ const censorText = async (req, res) => {
         } else {
             res.status(200).json({
                 success: true,
-                data: {text: text}
+                data: {censored_text: text}
             });
         }
     } catch (error) {

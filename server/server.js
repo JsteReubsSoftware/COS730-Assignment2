@@ -8,7 +8,9 @@ const jwt = require('jsonwebtoken')
 const Cookies = require('js-cookie')
 
 const allowedOrigins = [
-    'https://rj-automated-api-app.onrender.com'
+    'https://rj-automated-api-app.onrender.com',
+    `http://localhost:${process.env.REACT_APP_CLIENT_PORT}`,
+    `http://127.0.0.1:${process.env.REACT_APP_CLIENT_PORT}`
 ]
 
 const io = require('socket.io')(chatServer, {
@@ -65,12 +67,20 @@ io.on('connection', (socket) => {
             userId: jwt.decode(token).id,
             token: socket.handshake.headers['token']
         })
+
+        io.emit('users-connected', usersConnected)
+    })
+
+    socket.on('get-users', () => {
+        io.emit('users-connected', usersConnected)
     })
 
     socket.on('disconnect', () => {
         console.log('user disconnected')
 
         usersConnected = usersConnected.filter(user => user.id !== socket.id)
+
+        io.emit('users-connected', usersConnected)
     })
 
     socket.on('logout', () => {
@@ -88,10 +98,24 @@ io.on('connection', (socket) => {
             const viewedUserSocketID = viewedUser.id
 
             io.to(viewedUserSocketID).emit('private-message', viewedUserId, myID.id, text, time); // send it to the viewed user
+            io.to(viewedUserSocketID).emit('new-message', myID.id); // send it to the viewed user
         }
 
         // send it to myself
         socket.emit('private-message', viewedUserId, myID.id, text, time); // send it to myself
+    })
+
+    socket.on('activity', (viewedUserId, token) => {
+        // get viewed user
+        const viewedUser = usersConnected.find(user => user.userId === viewedUserId)
+
+        // get my ID
+        const myID = jwt.decode(token)
+        
+        if (viewedUser) {
+            const viewedUserSocketID = viewedUser.id
+            io.to(viewedUserSocketID).emit('activity', myID.id);
+        }
     })
 })
 

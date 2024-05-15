@@ -28,6 +28,8 @@ const ViewContactPage = () => {
     // eslint-disable-next-line
     const [timerId, setTimerId] = useState(null);
     const [spinnerText, setSpinnerText] = useState("Loading...");
+    const [isTyping, setIsTyping] = useState(false);
+    const [userStatus, setUserStatus] = useState(false);
 
     const handleSendMessage = async (event, text) => {
         const res = await API.sendMessage(Cookies.get('jwt'), viewedUser._id, text);
@@ -79,6 +81,12 @@ const ViewContactPage = () => {
         formattedTime = `${formattedHours}:${minutes} ${amPm}`;
 
         return formattedTime;
+    }
+
+    const handleChange = (event) => {
+        setMessage(event.target.value)
+
+        socket.emit('activity', viewedUser._id, Cookies.get('jwt'));
     }
 
     useEffect(( ) => {
@@ -143,6 +151,33 @@ const ViewContactPage = () => {
             window.location.href = "/landing";
         }
 
+        return ( ) => { socket.off('disconnect') };
+
+    //eslint-disable-next-line
+    }, []);
+
+    useEffect(() => {
+        socket.on('users-connected', (users) => {
+            if (viewedUser && users.find(user => user.userId === viewedUser._id)) {
+                setUserStatus(true);
+            } else {
+                setUserStatus(false);
+            }
+        });
+
+        let activityTimer;
+        socket.on('activity', (typingUserId) => {
+            if (viewedUser && typingUserId === viewedUser._id) {
+                setIsTyping(true);
+
+                // Clear after 3 seconds 
+                clearTimeout(activityTimer)
+                activityTimer = setTimeout(() => {
+                    setIsTyping(false);
+                }, 3000)
+            }
+        });
+
         socket.on('private-message', async (receiver, sender, content, time) => {
             // translate message to our preferred language
             // const res = await API.translateMessage(Cookies.get('jwt'), content);
@@ -152,33 +187,34 @@ const ViewContactPage = () => {
             //     return;
             // }
 
-            //censor text
-            const res = await API.censorText(Cookies.get('jwt'), content);
+            if (viewedUser && (viewedUser._id === receiver || viewedUser._id === sender)) {
+                //censor text
+                const res = await API.censorText(Cookies.get('jwt'), content);
 
-            if (res && !res.success) {
-                console.log(res.message);
-                return;
-            }
+                if (res && !res.success) {
+                    console.log(res.message);
+                    return;
+                }
 
-            content = res.data.censored_text;
+                content = res.data.censored_text;
 
-            if (content) {
-                const formattedTime = formatTime(time);
-                setMessagesSent(messagesSent => [...messagesSent, 
-                    {
-                        receiverId: receiver, 
-                        senderId: sender,
-                        text: content, 
-                        messageTime: time,
-                        formattedTime: formattedTime 
-                    }
-                ]);
+                if (content) {
+                    const formattedTime = formatTime(time);
+                    setMessagesSent(messagesSent => [...messagesSent, 
+                        {
+                            receiverId: receiver, 
+                            senderId: sender,
+                            text: content, 
+                            messageTime: time,
+                            formattedTime: formattedTime 
+                        }
+                    ]);
+                }
             }
         });
 
-        return ( ) => { socket.off('disconnect') };
-
-    }, []);
+        socket.emit('get-users');
+    }, [viewedUser]);
 
     useEffect(() => {
         // Scroll to bottom whenever messages update
@@ -248,14 +284,15 @@ const ViewContactPage = () => {
                         
                         <div className="w-full h-full pt-2">
                             <div className="flex pr-3 justify-start font-bold">
-                                <GoDotFill className="text-green-400"/>
-                                <span className="text-sm text-green-400">Online</span>
+                                <GoDotFill className={`my-auto ${userStatus ? "text-green-400" : "text-smoothGrey"}`}/>
+                                <span className={`text-sm my-auto ${userStatus ? "text-green-400" : "text-smoothGrey"}`}>{userStatus ? 'Online' : 'Offline'}</span>
+                                <span className={`ml-3 text-lightPurple italic text-sm ${isTyping ? 'opacity-100' : 'opacity-0'}`}>typing...</span>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div className="col-start-11 col-span-2">
-                    <MdCall className=" text-smoothWhite text-4xl h-full mx-auto" />
+                    <MdCall className=" text-smoothWhite text-4xl h-full mx-auto opacity-50" />
                 </div>
             </div>
             <div className="relative row-start-4 row-span-30 bg-opacity-80 bg-smoothWhite">
@@ -263,7 +300,7 @@ const ViewContactPage = () => {
                     {messagesSent.map((message, index) => {
                         return (
                             <Fragment key={`${message.formattedTime + index + viewedUser._id}`}>
-                                {index !== messagesSent.length - 1 && getDateLabel(message.messageTime) !== getDateLabel(messagesSent[index + 1].messageTime) && (
+                                {index === 0 && index !== messagesSent.length - 1 && getDateLabel(message.messageTime) !== getDateLabel(messagesSent[index + 1].messageTime) && (
                                     <div key={message.formattedTime + `${index}`} className="text-smoothWhite text-sm bg-lightPurple rounded-lg mx-auto p-1">
                                         {getDateLabel(message.messageTime)}
                                     </div>
@@ -272,6 +309,11 @@ const ViewContactPage = () => {
                                     <div className="w-fit max-w-80 break-words">{message.text}</div>
                                     <div className={`${message.senderId === viewedUser._id ? "text-smoothGrey" : "text-whitePurple"} text-[10px] font-bold text-end`}>{message.formattedTime}</div>
                                 </div>
+                                {index > 0 && index !== messagesSent.length - 1 && getDateLabel(message.messageTime) !== getDateLabel(messagesSent[index + 1].messageTime) && (
+                                    <div key={message.formattedTime + `${index}`} className="text-smoothWhite text-sm bg-lightPurple rounded-lg mx-auto p-1">
+                                        {getDateLabel(message.messageTime)}
+                                    </div>
+                                )}
                             </ Fragment>
                         );
                     })}
@@ -284,7 +326,7 @@ const ViewContactPage = () => {
                     <FaRegImage className="text-smoothWhite text-4xl h-full mx-auto"/>
                 </div>
                 <div className="h-[50px] col-start-8 col-span-29 mx-2 my-auto bg-smoothWhite flex justify-between rounded-xl border-2 border-darkPurple">
-                    <input id="message-input" type="text" placeholder="Type a message" className="text-lg w-full h-full bg-transparent outline-none border-none px-2 py-1" onChange={(e) => setMessage(e.target.value)}/>
+                    <input id="message-input" type="text" placeholder="Type a message" className="text-lg w-full h-full bg-transparent outline-none border-none px-2 py-1" onChange={(e) => handleChange(e)}/>
                     <IoSend className={`mx-2 text-darkPurple text-2xl h-full my-auto ${message !== "" ? "cursor-pointer" : "opacity-60"}`} onClick={(e) => message !== "" && handleSendMessage(e, message)}/>
                 </div>
             </div>

@@ -1,6 +1,7 @@
 import axios from "axios"
 
-const API = axios.create({baseURL:"https://rj-automated-api.onrender.com"})
+const API = axios.create({baseURL:"http://localhost:3000"})
+// const API = axios.create({baseURL:"https://rj-automated-api.onrender.com"})
 
 API.interceptors.request.use((req)=>{
     if(localStorage.getItem("user_info")){
@@ -86,6 +87,19 @@ export const getUserContacts = async (token) => {
     return response.data;
 }
 
+export const getUnknownContacts = async (token) => {
+    const validToken = await validateToken(token);
+    if (!validToken.valid) {
+        return null;
+    }
+
+    const email = validToken.user.email;
+    const params = new URLSearchParams({ email });
+    
+    const response = await API.get('/api/getUnknownContacts?' + params.toString());
+    return response.data;
+}
+
 // PUT requests
 
 export const updateUserLanguage = async (token, language, email) => {
@@ -157,6 +171,19 @@ export const removeContact = async (token, contactEmail) => {
     const response = await API.post('/api/removeContact', {
         contactEmail,
         myEmail
+    });
+
+    return response.data;
+}
+
+export const deleteAccount = async (token) => {
+    const validToken = await validateToken(token);
+    if (!validToken.valid) {
+        return null;
+    }
+
+    const response = await API.post('/api/deleteAccount', {
+        email: validToken.user.email
     });
 
     return response.data;

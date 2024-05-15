@@ -14,14 +14,25 @@ import { useEffect, useState } from "react";
 import Cookies from 'js-cookie';
 
 import * as API from "../api/api";
+import { socket } from '../socket';
+import ConfirmDeleteModal from "../components/confirmDeleteModal";
 
 
 const ProfilePage = () => {
+    if (!Cookies.get('jwt') || !socket) {
+        window.location.href = '/landing';
+    } else if (!socket.connected) {
+        socket.connect();
+    }
+
     const [language, setLanguage] = useState(null);
     const [blurText, setBlurText] = useState(false);
     const [username, setUsername] = useState(null);
     const [prevUsername, setPrevUsername] = useState(null);
     const [editingUsername, setEditingUsername] = useState(false);
+    const [profileImage, setProfileImage] = useState(null);
+    const [email, setEmail] = useState(null);
+    const [showConfirmModal, setShowConfirmModal] = useState(false);
     
     const options = Object.keys(LANGUAGES).map((key) => ({ value: key, label: LANGUAGES[key][0].toUpperCase() + LANGUAGES[key].slice(1) }));
 
@@ -46,9 +57,40 @@ const ProfilePage = () => {
     };
 
     const notify = (message) => {
+        if (message.includes('Something went wrong')) {
+            toast.error(message, {
+                autoClose: 1000
+            });
+            return;
+        }
+
         toast.success(message, {
             autoClose: 1000
         });
+    }
+
+    const handleLogout = () => {
+        Cookies.remove('jwt');
+        window.location.href = '/landing';
+    }
+
+    const handleClose = (message) => {
+        setShowConfirmModal(false);
+
+        if (message) {
+            notify(message);
+        }
+    }
+
+    const deleteAccount = async () => {
+        const userRes = await API.deleteAccount(Cookies.get('jwt'));
+
+        if (userRes && userRes.success) {
+            handleLogout();
+        }
+        else {
+            notify('Something went wrong. Unable to delete account');
+        }
     }
 
     const handleLangChange = async (e) => {
@@ -105,10 +147,12 @@ const ProfilePage = () => {
                 const res = await API.getUserByEmail(Cookies.get('jwt'));
                 
                 if (res.user) {
-                  setLanguage(res.user.language);
-                  setBlurText(res.user.censorText);
-                  setUsername(res.user.name);
-                  setPrevUsername(res.user.name);
+                  setLanguage(res.user['language']);
+                  setBlurText(res.user['censorText']);
+                  setUsername(res.user['name']);
+                  setPrevUsername(res.user['name']);
+                  setProfileImage(res.user['profileImg']);
+                  setEmail(res.user['email']);
                 }
             };
     
@@ -126,7 +170,7 @@ const ProfilePage = () => {
             const editUsernameBTN = document.getElementById("edit-username-btn");
 
             // Check if clicked outside the input element
-            if (!event.target.matches('#username-input') && !inputElement?.contains(event.target) && editingUsername) {
+            if (!event.target.matches('#username-input') && !inputElement?.value.includes(event.target) && editingUsername) {
                 inputElement.blur();
                 setEditingUsername(false);
                 setUsername(prevUsername);
@@ -156,7 +200,7 @@ const ProfilePage = () => {
         return blurText != null ? blurText : false;
     }
 
-    return language && (blurText === true || blurText === false) ? (
+    return language && (blurText === true || blurText === false) && profileImage ? (
         <div className="h-screen w-full bg-smoothWhite grid grid-rows-36">
             <ToastContainer position="top-left"/>
             <div className="w-full h-full flex flex-col p-1 row-start-1 row-span-11">
@@ -165,7 +209,7 @@ const ProfilePage = () => {
                     <span className="my-auto ml-2 font-irishGrover">Yahoo! Messenger</span>
                 </div>
                 <div className="m-auto my-4 flex flex-col justify-center w-full">
-                    <img src={require("../assets/profile-pic.jpg")} width='150px' alt="profile" className="rounded-full self-center"/>
+                    <img src={`${profileImage}`} width='150px' alt="profile" className="rounded-full self-center"/>
                     <span className="self-center text-center mt-2 text-2xl font-bold w-[400px]">{username.length > 20 ? username.slice(0, 20) + "..." : username}</span>
                 </div>
             </div>
@@ -191,7 +235,7 @@ const ProfilePage = () => {
                 <div className="mx-10 my-4 flex flex-col">
                     <label className="text-lg">Email Address <span className="text-smoothGrey italic text-sm mx-2">(cannot change email)</span></label>
                     <div className="flex my-2">
-                        <input type="text" value="joostereuben0830@gmail.com" readOnly disabled className="text-smoothGrey w-full focus:outline-none border-2 border-darkPurple rounded-xl h-[35px] p-2"/>                       
+                        <input type="text" value={email} readOnly disabled className="text-smoothGrey w-full focus:outline-none border-2 border-darkPurple rounded-xl h-[35px] p-2"/>                       
                     </div>
                 </div>
                 <div className="mx-10 my-4 flex flex-col">
@@ -211,19 +255,23 @@ const ProfilePage = () => {
                             onChange={handleBlurTextChange} 
                         />
                 </div>
-                <div className="m-10 flex justify-center">
+                <div className="m-10 flex justify-center" onClick={handleLogout}>
                     <div className="ml-3 mr-2">
                         <BiLogOut className="w-full h-full m-auto text-[40px] text-darkPurple"/>
                     </div>
                     <label className="self-center text-md text-darkPurple">Log out</label>
                 </div>
-                <div className="m-10 flex justify-center">
+                <div className="m-10 flex justify-center" onClick={() => setShowConfirmModal(true)}>
                     <div className="ml-3 mr-2">
                         <RiDeleteBinLine className="w-full h-full m-auto text-[30px] text-red-500"/>
                     </div>
                     <label className="self-center text-sm text-red-500">Delete Account</label>
                 </div>
             </div>
+            {showConfirmModal && 
+                <div className="absolute w-full h-full bg-smoothGrey bg-opacity-50 z-10 flex justify-center px-10 py-60">
+                    <ConfirmDeleteModal isOpen={showConfirmModal} onClose={(message) => handleClose(message)} deleteAccount={() => deleteAccount(email)} />
+                </div>}
         </div>
     ) :
     (

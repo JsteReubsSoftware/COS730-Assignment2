@@ -1,6 +1,7 @@
 import { MdAddBox } from "react-icons/md";
-import { IoFilter } from "react-icons/io5";
+import { MdIndeterminateCheckBox } from "react-icons/md";
 import { ImSpinner10 } from "react-icons/im";
+import { FaInbox } from "react-icons/fa";
 
 import ContactCard from "../components/contactCard";
 import { useEffect, useState } from "react";
@@ -11,41 +12,93 @@ import 'react-toastify/dist/ReactToastify.css';
 import * as API from "../api/api";
 import AddContactModal from "../components/addContactModal";
 
+import { socket } from "../socket";
+import DeleteContactModal from "../components/deleteContactModal";
+
 const ContactsPage = () => {
-    const [contacts, setContacts] = useState(null); 
-    const [showModal, setShowModal] = useState(false);
+    
+    if (!Cookies.get('jwt') || !socket) {
+        window.location.href = '/landing';
+    } else if (!socket.connected) {
+        socket.connect();
+    }
+
+    const [contacts, setContacts] = useState(null);
+    const [filteredContacts, setFilteredContacts] = useState(null);
+    const [unknownContacts, setUnknownContacts] = useState(null);
+    const [filteredUnknownContacts, setFilteredUnknownContacts] = useState(null);
+    const [showModalAdd, setShowModalAdd] = useState(false);
+    const [showModalDelete, setShowModalDelete] = useState(false);
 
     const addNewContact = async (updatedContacts) => {
         setContacts(updatedContacts);
+        setFilteredContacts(updatedContacts);
+        document.querySelector('#search-bar').value = '';
+        document.querySelector('#search-bar').blur();
+        console.log(updatedContacts);
+    }
+
+    const deleteContact = async (updatedContacts) => {
+        setContacts(updatedContacts);
+        setFilteredContacts(updatedContacts);
+        document.querySelector('#search-bar').value = '';
+        document.querySelector('#search-bar').blur();
         console.log(updatedContacts);
     }
 
     const notify = (message) => {
+        if (message.includes('Contact Not Found')) {
+            toast.error(message, {
+                autoClose: 1000
+            });
+            return;
+        }
+
         toast.success(message, {
             autoClose: 1000
         });
     }
 
     const handleClose = (message) => {
-        setShowModal(false);
+        setShowModalAdd(false);
+        setShowModalDelete(false);
 
         if (message) {
             notify(message);
         }
     }
 
+    const handleSearch = (searchValue) => {
+        //filter contacts based on search value
+
+        setFilteredContacts(contacts.filter(contact => contact.name.toLowerCase().includes(searchValue.toLowerCase())))
+        setFilteredUnknownContacts(unknownContacts.filter(contact => contact.email.toLowerCase().includes(searchValue.toLowerCase())))
+    }
+
     useEffect(() => {
         async function fetchContacts() {
             const res = await API.getUserContacts(Cookies.get('jwt'));
+            const unknownRes = await API.getUnknownContacts(Cookies.get('jwt'));
             
-            setContacts(res.data.contacts);
+            
+            if (res.data.contacts) {
+                setContacts(res.data.contacts);
+                setFilteredContacts(res.data.contacts);
+            }
+
+            if (unknownRes.data.unknownContacts) {
+                setUnknownContacts(unknownRes.data.unknownContacts);
+                setFilteredUnknownContacts(unknownRes.data.unknownContacts);
+            }
         }
 
         fetchContacts();
 
+        socket.emit('get-users');
+
     }, []);
 
-    return contacts ? (
+    return contacts && (unknownContacts && unknownContacts.length >= 0) ? (
         <div className="relative h-screen w-full bg-smoothWhite grid grid-rows-36"> {/* add grids if the screen size is desktop */}
             <ToastContainer position="top-left"/>
             <div className="w-full h-full bg-transparent flex flex-col p-1 row-start-1 row-span-5">
@@ -54,13 +107,13 @@ const ContactsPage = () => {
                     <span className="my-auto ml-2 font-irishGrover">Yahoo! Messenger</span>
                 </div>
                 <div className="flex justify-between mt-2">
-                    <input type="text" placeholder="Search contacts" className="mx-3 mt-2 my-auto w-full focus:outline-none focus:border-darkPurple border-2 border-lightPurple rounded-xl px-2 py-1" />
+                    <input id='search-bar' type="text" placeholder="Search contacts" className="mx-3 mt-2 my-auto w-full focus:outline-none focus:border-darkPurple border-2 border-lightPurple rounded-xl px-2 py-1" onChange={(e) => handleSearch(e.target.value)} />
                     <div className="w-1/2 flex justify-evenly">
                         <div className="bg-smoothWhite">
-                            <MdAddBox className="w-full h-full text-darkPurple text-[40px]" onClick={() => (setShowModal(!showModal))}/>
+                            <MdAddBox className="w-full h-full text-darkPurple text-[40px]" onClick={() => (setShowModalAdd(!showModalAdd))}/>
                         </div>
                         <div className="bg-smoothWhite">
-                            <IoFilter className="w-full h-full text-darkPurple text-[40px]"/>
+                            <MdIndeterminateCheckBox className={`w-full h-full text-darkPurple text-[40px] ${contacts && contacts.length > 0 ? 'opacity-100' : 'opacity-50'}`} onClick={() => (setShowModalDelete(!showModalDelete))}/>
                         </div> 
                     </div>
                 </div>
@@ -68,15 +121,43 @@ const ContactsPage = () => {
             <div className="w-full h-full pb-5 overflow-auto flex flex-col row-start-6 row-span-29">
                 {
                     // render the contact cards
-                    contacts.map((contact) => (
+                    filteredContacts && filteredContacts.length > 0 && filteredContacts.map((contact) => (
                         <ContactCard key={contact._id} contact={contact} />
                     ))
                 }
+                { filteredUnknownContacts && filteredUnknownContacts.length > 0 &&
+                    <div className="text-center bg-transparent flex justify-center w-full px-5 py-1 rounded-lg my-2">
+                        <hr className="border-2 border-darkPurple w-full my-auto"/>
+                        <label className="text-smoothWhite rounded-lg bg-darkPurple w-full">Unknown Contacts</label>
+                        <hr className="border-2 border-darkPurple w-full my-auto"/>
+                    </div>
+                }
+                {
+                    filteredUnknownContacts && filteredUnknownContacts.length > 0 && filteredUnknownContacts.map((contact) => (
+                        <ContactCard key={contact._id} contact={contact} />
+                    ))
+                }
+                { contacts && contacts.length === 0 && unknownContacts && unknownContacts.length === 0 &&
+                    <div className="m-auto text-center">
+                        <FaInbox className="text-darkPurple w-full h-full" />
+                        <span className="text-darkPurple">You have no contacts</span>
+                    </div>
+                }
+                { contacts && contacts.length > 0 && filteredContacts && filteredContacts.length === 0 && unknownContacts && unknownContacts.length === 0 && filteredUnknownContacts && filteredUnknownContacts.length === 0 &&
+                    <div className="m-auto text-center">
+                        <FaInbox className="text-darkPurple w-full h-full" />
+                        <span className="text-darkPurple w-full">No contacts found</span>
+                    </div>
+                }
             </div>
             {/* render the contact view page if the screen size allows it */}
-            {showModal && 
+            {showModalAdd && 
                 <div className="absolute w-full h-full bg-smoothGrey bg-opacity-50 z-10 flex justify-center px-10 py-60">
-                    <AddContactModal isOpen={showModal} onClose={(message) => handleClose(message)} updateContacts={(updatedContacts) => addNewContact(updatedContacts)} />
+                    <AddContactModal isOpen={showModalAdd} onClose={(message) => handleClose(message)} updateContacts={(updatedContacts) => addNewContact(updatedContacts)} />
+                </div>}
+            {showModalDelete && 
+                <div className="absolute w-full h-full bg-smoothGrey bg-opacity-50 z-10 flex justify-center px-10 py-60">
+                    <DeleteContactModal isOpen={showModalDelete} onClose={(message) => handleClose(message)} updateContacts={(updatedContacts) => deleteContact(updatedContacts)} />
                 </div>}
         </div>
     ) : (
