@@ -24,7 +24,9 @@ const ContactsPage = () => {
     }
 
     const [contacts, setContacts] = useState(null);
-    const [filteredContacts, setFilteredContacts] = useState(null); 
+    const [filteredContacts, setFilteredContacts] = useState(null);
+    const [unknownContacts, setUnknownContacts] = useState(null);
+    const [filteredUnknownContacts, setFilteredUnknownContacts] = useState(null);
     const [showModalAdd, setShowModalAdd] = useState(false);
     const [showModalDelete, setShowModalDelete] = useState(false);
 
@@ -45,6 +47,13 @@ const ContactsPage = () => {
     }
 
     const notify = (message) => {
+        if (message.includes('Contact Not Found')) {
+            toast.error(message, {
+                autoClose: 1000
+            });
+            return;
+        }
+
         toast.success(message, {
             autoClose: 1000
         });
@@ -63,14 +72,24 @@ const ContactsPage = () => {
         //filter contacts based on search value
 
         setFilteredContacts(contacts.filter(contact => contact.name.toLowerCase().includes(searchValue.toLowerCase())))
+        setFilteredUnknownContacts(unknownContacts.filter(contact => contact.email.toLowerCase().includes(searchValue.toLowerCase())))
     }
 
     useEffect(() => {
         async function fetchContacts() {
             const res = await API.getUserContacts(Cookies.get('jwt'));
+            const unknownRes = await API.getUnknownContacts(Cookies.get('jwt'));
             
-            setContacts(res.data.contacts);
-            setFilteredContacts(res.data.contacts);
+            
+            if (res.data.contacts) {
+                setContacts(res.data.contacts);
+                setFilteredContacts(res.data.contacts);
+            }
+
+            if (unknownRes.data.unknownContacts) {
+                setUnknownContacts(unknownRes.data.unknownContacts);
+                setFilteredUnknownContacts(unknownRes.data.unknownContacts);
+            }
         }
 
         fetchContacts();
@@ -79,7 +98,7 @@ const ContactsPage = () => {
 
     }, []);
 
-    return contacts ? (
+    return contacts && (unknownContacts && unknownContacts.length >= 0) ? (
         <div className="relative h-screen w-full bg-smoothWhite grid grid-rows-36"> {/* add grids if the screen size is desktop */}
             <ToastContainer position="top-left"/>
             <div className="w-full h-full bg-transparent flex flex-col p-1 row-start-1 row-span-5">
@@ -94,7 +113,7 @@ const ContactsPage = () => {
                             <MdAddBox className="w-full h-full text-darkPurple text-[40px]" onClick={() => (setShowModalAdd(!showModalAdd))}/>
                         </div>
                         <div className="bg-smoothWhite">
-                            <MdIndeterminateCheckBox className="w-full h-full text-darkPurple text-[40px]" onClick={() => (setShowModalDelete(!showModalDelete))}/>
+                            <MdIndeterminateCheckBox className={`w-full h-full text-darkPurple text-[40px] ${contacts && contacts.length > 0 ? 'opacity-100' : 'opacity-50'}`} onClick={() => (setShowModalDelete(!showModalDelete))}/>
                         </div> 
                     </div>
                 </div>
@@ -106,13 +125,25 @@ const ContactsPage = () => {
                         <ContactCard key={contact._id} contact={contact} />
                     ))
                 }
-                { contacts && contacts.length === 0 && 
+                { filteredUnknownContacts && filteredUnknownContacts.length > 0 &&
+                    <div className="text-center bg-transparent flex justify-center w-full px-5 py-1 rounded-lg my-2">
+                        <hr className="border-2 border-darkPurple w-full my-auto"/>
+                        <label className="text-smoothWhite rounded-lg bg-darkPurple w-full">Unknown Contacts</label>
+                        <hr className="border-2 border-darkPurple w-full my-auto"/>
+                    </div>
+                }
+                {
+                    filteredUnknownContacts && filteredUnknownContacts.length > 0 && filteredUnknownContacts.map((contact) => (
+                        <ContactCard key={contact._id} contact={contact} />
+                    ))
+                }
+                { contacts && contacts.length === 0 && unknownContacts && unknownContacts.length === 0 &&
                     <div className="m-auto text-center">
                         <FaInbox className="text-darkPurple w-full h-full" />
                         <span className="text-darkPurple">You have no contacts</span>
                     </div>
                 }
-                { contacts && contacts.length > 0 && filteredContacts && filteredContacts.length === 0 && 
+                { contacts && contacts.length > 0 && filteredContacts && filteredContacts.length === 0 && unknownContacts && unknownContacts.length === 0 && filteredUnknownContacts && filteredUnknownContacts.length === 0 &&
                     <div className="m-auto text-center">
                         <FaInbox className="text-darkPurple w-full h-full" />
                         <span className="text-darkPurple w-full">No contacts found</span>

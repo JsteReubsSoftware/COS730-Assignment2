@@ -98,20 +98,23 @@ io.on('connection', (socket) => {
             const viewedUserSocketID = viewedUser.id
 
             io.to(viewedUserSocketID).emit('private-message', viewedUserId, myID.id, text, time); // send it to the viewed user
-            io.to(viewedUserSocketID).emit('new-message'); // send it to the viewed user
+            io.to(viewedUserSocketID).emit('new-message', myID.id); // send it to the viewed user
         }
 
         // send it to myself
         socket.emit('private-message', viewedUserId, myID.id, text, time); // send it to myself
     })
 
-    socket.on('activity', (viewedUserId) => {
+    socket.on('activity', (viewedUserId, token) => {
         // get viewed user
         const viewedUser = usersConnected.find(user => user.userId === viewedUserId)
+
+        // get my ID
+        const myID = jwt.decode(token)
         
         if (viewedUser) {
             const viewedUserSocketID = viewedUser.id
-            io.to(viewedUserSocketID).emit('activity', viewedUserId);
+            io.to(viewedUserSocketID).emit('activity', myID.id);
         }
     })
 })

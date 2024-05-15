@@ -47,7 +47,7 @@ const ContactCard = ({ contact }) => {
           return `${minutesDiff} min ago`;
         } else if (secondsDiff < oneDay) {
           const hoursDiff = Math.floor(secondsDiff / oneHour);
-          return `${hoursDiff === 1 ? "1 hour ago" : " hours ago"}`;
+          return `${hoursDiff === 1 ? "1 hour ago" : hoursDiff + " hours ago"}`;
         } else if (secondsDiff < oneDay * 2) {  // Check for yesterday within 24 hours
           return `Yesterday at ${messageTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
         } else {
@@ -62,18 +62,22 @@ const ContactCard = ({ contact }) => {
 
     useEffect(() => {
         let activityTimer;
-        socket.on('activity', () => {
-            setIsTyping(true);
+        socket.on('activity', (typingUserId) => {
+            if (typingUserId === contact._id) {
+                setIsTyping(true);
 
-            // Clear after 3 seconds 
-            clearTimeout(activityTimer)
-            activityTimer = setTimeout(() => {
-                setIsTyping(false);
-            }, 3000)
+                // Clear after 3 seconds 
+                clearTimeout(activityTimer)
+                activityTimer = setTimeout(() => {
+                    setIsTyping(false);
+                }, 3000)
+            }
         })
 
-        socket.on('new-message', () => {
-            setNewMessages(prev => prev + 1);
+        socket.on('new-message', (typingUserId) => {
+            if (typingUserId === contact._id) {                
+                setNewMessages(prev => prev + 1);
+            }
         })
 
         socket.on('users-connected', (users) => {
@@ -90,6 +94,10 @@ const ContactCard = ({ contact }) => {
             const res = await API.getMessages(Cookies.get('jwt'), contact._id);
 
             if (res && res.success) {
+                if (res.data.length === 0) {
+                    return;
+                }
+
                 const lastMessageTime = res.data[res.data.length-1].messageTime;
 
                 const time = new Date(lastMessageTime).getTime();

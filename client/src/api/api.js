@@ -87,6 +87,19 @@ export const getUserContacts = async (token) => {
     return response.data;
 }
 
+export const getUnknownContacts = async (token) => {
+    const validToken = await validateToken(token);
+    if (!validToken.valid) {
+        return null;
+    }
+
+    const email = validToken.user.email;
+    const params = new URLSearchParams({ email });
+    
+    const response = await API.get('/api/getUnknownContacts?' + params.toString());
+    return response.data;
+}
+
 // PUT requests
 
 export const updateUserLanguage = async (token, language, email) => {
@@ -158,6 +171,19 @@ export const removeContact = async (token, contactEmail) => {
     const response = await API.post('/api/removeContact', {
         contactEmail,
         myEmail
+    });
+
+    return response.data;
+}
+
+export const deleteAccount = async (token) => {
+    const validToken = await validateToken(token);
+    if (!validToken.valid) {
+        return null;
+    }
+
+    const response = await API.post('/api/deleteAccount', {
+        email: validToken.user.email
     });
 
     return response.data;

@@ -86,7 +86,7 @@ const ViewContactPage = () => {
     const handleChange = (event) => {
         setMessage(event.target.value)
 
-        socket.emit('activity', viewedUser._id);
+        socket.emit('activity', viewedUser._id, Cookies.get('jwt'));
     }
 
     useEffect(( ) => {
@@ -151,50 +151,6 @@ const ViewContactPage = () => {
             window.location.href = "/landing";
         }
 
-        socket.on('private-message', async (receiver, sender, content, time) => {
-            // translate message to our preferred language
-            // const res = await API.translateMessage(Cookies.get('jwt'), content);
-
-            // if (res && !res.success) {
-            //     console.log(res.message);
-            //     return;
-            // }
-
-            //censor text
-            const res = await API.censorText(Cookies.get('jwt'), content);
-
-            if (res && !res.success) {
-                console.log(res.message);
-                return;
-            }
-
-            content = res.data.censored_text;
-
-            if (content) {
-                const formattedTime = formatTime(time);
-                setMessagesSent(messagesSent => [...messagesSent, 
-                    {
-                        receiverId: receiver, 
-                        senderId: sender,
-                        text: content, 
-                        messageTime: time,
-                        formattedTime: formattedTime 
-                    }
-                ]);
-            }
-        });
-
-        let activityTimer;
-        socket.on('activity', () => {
-            setIsTyping(true);
-
-            // Clear after 3 seconds 
-            clearTimeout(activityTimer)
-            activityTimer = setTimeout(() => {
-                setIsTyping(false);
-            }, 3000)
-        })
-
         return ( ) => { socket.off('disconnect') };
 
     //eslint-disable-next-line
@@ -206,6 +162,54 @@ const ViewContactPage = () => {
                 setUserStatus(true);
             } else {
                 setUserStatus(false);
+            }
+        });
+
+        let activityTimer;
+        socket.on('activity', (typingUserId) => {
+            if (viewedUser && typingUserId === viewedUser._id) {
+                setIsTyping(true);
+
+                // Clear after 3 seconds 
+                clearTimeout(activityTimer)
+                activityTimer = setTimeout(() => {
+                    setIsTyping(false);
+                }, 3000)
+            }
+        });
+
+        socket.on('private-message', async (receiver, sender, content, time) => {
+            // translate message to our preferred language
+            // const res = await API.translateMessage(Cookies.get('jwt'), content);
+
+            // if (res && !res.success) {
+            //     console.log(res.message);
+            //     return;
+            // }
+
+            if (viewedUser && (viewedUser._id === receiver || viewedUser._id === sender)) {
+                //censor text
+                const res = await API.censorText(Cookies.get('jwt'), content);
+
+                if (res && !res.success) {
+                    console.log(res.message);
+                    return;
+                }
+
+                content = res.data.censored_text;
+
+                if (content) {
+                    const formattedTime = formatTime(time);
+                    setMessagesSent(messagesSent => [...messagesSent, 
+                        {
+                            receiverId: receiver, 
+                            senderId: sender,
+                            text: content, 
+                            messageTime: time,
+                            formattedTime: formattedTime 
+                        }
+                    ]);
+                }
             }
         });
 

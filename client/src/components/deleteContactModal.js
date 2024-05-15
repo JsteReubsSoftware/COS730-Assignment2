@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { MdOutlineClose, MdDone } from "react-icons/md";
+import { MdOutlineClose } from "react-icons/md";
 import { RiDeleteBinLine } from "react-icons/ri";
 
 import Cookies from 'js-cookie';
@@ -25,6 +25,8 @@ const DeleteContactModal = ({ isOpen, onClose, updateContacts}) => {
             if (res2.success) {
                 onClose('Contact Deleted');
                 updateContacts(res2.data.user.contacts);
+            } else {
+                onClose('Contact Not Found');
             }
         }
     }
