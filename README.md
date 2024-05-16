@@ -6,4 +6,4 @@
 - Message text translation between sender and receiver
 - Message sentiment analysis service to blurr censored text
 
-![Static Badge](https://img.shields.io/badge/Go%20to%20live%20site%20-g%3Fcolor%3D792ED6%26link%3Dhttps%3A%2F%2Frj-automated-api-app.onrender.com)
+![Static Badge](https://img.shields.io/badge/Go_To_Live_Site-g?color=%23792ed6&link=https%3A%2F%2Frj-automated-api-app.onrender.com)
