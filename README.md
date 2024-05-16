@@ -15,3 +15,6 @@
 ### Two automated API components:
 - Message text translation between sender and receiver
 - Message sentiment analysis service to blurr censored text
+
+### System Documentation on Github Wiki:
+[Github Wiki](https://github.com/JsteReubsSoftware/COS730-Assignment2/wiki)
