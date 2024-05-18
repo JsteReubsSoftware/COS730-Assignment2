@@ -14,7 +14,7 @@ import { socket } from "../socket";
 
 const ViewContactPage = () => {  
     if (!Cookies.get('jwt') || !socket) {
-        window.location.href = '/landing';
+        window.location.href = '#/landing';
     } else if (!socket.connected) {
         socket.connect();
     }
@@ -148,7 +148,7 @@ const ViewContactPage = () => {
             }
         } 
         else {
-            window.location.href = "/landing";
+            window.location.href = "#/landing";
         }
 
         return ( ) => { socket.off('disconnect') };
