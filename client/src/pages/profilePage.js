@@ -20,7 +20,7 @@ import ConfirmDeleteModal from "../components/confirmDeleteModal";
 
 const ProfilePage = () => {
     if (!Cookies.get('jwt') || !socket) {
-        window.location.href = '/landing';
+        window.location.href = '#/landing';
     } else if (!socket.connected) {
         socket.connect();
     }
@@ -71,7 +71,7 @@ const ProfilePage = () => {
 
     const handleLogout = () => {
         Cookies.remove('jwt');
-        window.location.href = '/landing';
+        window.location.href = '#/landing';
     }
 
     const handleClose = (message) => {
@@ -159,7 +159,7 @@ const ProfilePage = () => {
             getStates();
         } 
         else {
-            window.location.href = "/landing";
+            window.location.href = "#/landing";
         }
     }, [])
 

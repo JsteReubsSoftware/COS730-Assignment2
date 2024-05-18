@@ -18,7 +18,7 @@ import DeleteContactModal from "../components/deleteContactModal";
 const ContactsPage = () => {
     
     if (!Cookies.get('jwt') || !socket) {
-        window.location.href = '/landing';
+        window.location.href = '#/landing';
     } else if (!socket.connected) {
         socket.connect();
     }
