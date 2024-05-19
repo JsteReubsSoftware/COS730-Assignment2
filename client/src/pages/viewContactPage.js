@@ -34,7 +34,7 @@ const ViewContactPage = () => {
     const handleSendMessage = async (event, text) => {
         const res = await API.sendMessage(Cookies.get('jwt'), viewedUser._id, text);
 
-        if (res.success) {
+        if (res && res.success) {
             setMessage("");
             document.getElementById("message-input").focus();
             document.getElementById("message-input").value = "";
@@ -121,7 +121,7 @@ const ViewContactPage = () => {
 
                 const res = await API.getUserById(Cookies.get('jwt'), params.get('id'));
                 
-                if (res.user) {
+                if (res &&res.user) {
                     setViewedUser(res.user);
 
                     const newRes = await API.getMessages(Cookies.get('jwt'), res.user._id);

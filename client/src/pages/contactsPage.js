@@ -81,12 +81,12 @@ const ContactsPage = () => {
             const unknownRes = await API.getUnknownContacts(Cookies.get('jwt'));
             
             
-            if (res.data.contacts) {
+            if (res && res.data.contacts) {
                 setContacts(res.data.contacts);
                 setFilteredContacts(res.data.contacts);
             }
 
-            if (unknownRes.data.unknownContacts) {
+            if (unknownRes && unknownRes.data.unknownContacts) {
                 setUnknownContacts(unknownRes.data.unknownContacts);
                 setFilteredUnknownContacts(unknownRes.data.unknownContacts);
             }

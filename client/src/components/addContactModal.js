@@ -15,13 +15,13 @@ const AddContactModal = ({ isOpen, onClose, updateContacts}) => {
     const handleAddContact = async (email) => {
         const res = await API.getUserByEmail(Cookies.get('jwt'), email);
 
-        if (!res.user) {
+        if (res &&!res.user) {
             setValidEmail(false);
         }
         else {
             const res2 = await API.addContact(Cookies.get('jwt'), res.user.email);
 
-            if (res2.success) {
+            if (res2 && res2.success) {
                 onClose('Contact Added');
                 updateContacts(res2.data.user.contacts);
             }
