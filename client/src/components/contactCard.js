@@ -63,7 +63,7 @@ const ContactCard = ({ contact }) => {
     useEffect(() => {
         let activityTimer;
         socket.on('activity', (typingUserId) => {
-            if (typingUserId === contact._id) {
+            if (contact && typingUserId === contact._id) {
                 setIsTyping(true);
 
                 // Clear after 3 seconds 
@@ -75,13 +75,13 @@ const ContactCard = ({ contact }) => {
         })
 
         socket.on('new-message', (typingUserId) => {
-            if (typingUserId === contact._id) {                
+            if (contact && typingUserId === contact._id) {                
                 setNewMessages(prev => prev + 1);
             }
         })
 
         socket.on('users-connected', (users) => {
-            if (users.find(user => user.userId === contact._id)) {
+            if (contact && users.find(user => user.userId === contact._id)) {
                 setUserStatus(true);
             } else {
                 setUserStatus(false);

@@ -16,13 +16,13 @@ const DeleteContactModal = ({ isOpen, onClose, updateContacts}) => {
     const handleDeleteContact = async (email) => {
         const res = await API.getUserByEmail(Cookies.get('jwt'), email);
 
-        if (!res.user) {
+        if (res && !res.user) {
             setValidEmail(false);
         }
         else {
             const res2 = await API.removeContact(Cookies.get('jwt'), res.user.email);
 
-            if (res2.success) {
+            if (res2 &&res2.success) {
                 onClose('Contact Deleted');
                 updateContacts(res2.data.user.contacts);
             } else {

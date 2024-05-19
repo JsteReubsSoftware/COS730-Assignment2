@@ -96,7 +96,7 @@ const ProfilePage = () => {
     const handleLangChange = async (e) => {
         const userRes = await API.getUserByEmail(Cookies.get('jwt'));
                 
-        if (userRes.user) {
+        if (userRes && userRes.user) {
 
             const res = await API.updateUserLanguage(Cookies.get('jwt'), e.value, userRes.user.email);
 
@@ -111,7 +111,7 @@ const ProfilePage = () => {
     const handleBlurTextChange = async () => {
         const userRes = await API.getUserByEmail(Cookies.get('jwt'));
                 
-        if (userRes.user) {
+        if (userRes && userRes.user) {
             const res = await API.updateUserBlurText(Cookies.get('jwt'), !userRes.user.censorText, userRes.user.email);
 
             if (res && res.success) {
@@ -125,7 +125,7 @@ const ProfilePage = () => {
     const handleUpdateUsername = async () => {
         const userRes = await API.getUserByEmail(Cookies.get('jwt'));
 
-        if (userRes.user) {
+        if (userRes && userRes.user) {
             const res = await API.updateUsername(Cookies.get('jwt'), username, userRes.user.email);
 
             if (res && res.success) {
@@ -146,7 +146,7 @@ const ProfilePage = () => {
             const getStates = async () => {
                 const res = await API.getUserByEmail(Cookies.get('jwt'));
                 
-                if (res.user) {
+                if (res && res.user) {
                   setLanguage(res.user['language']);
                   setBlurText(res.user['censorText']);
                   setUsername(res.user['name']);

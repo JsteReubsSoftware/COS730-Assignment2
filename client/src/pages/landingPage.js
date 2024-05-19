@@ -38,7 +38,7 @@ const LandingPage = () => {
         const getUser = async () => {
           const res = await API.getUserByEmail(Cookies.get('jwt'));
           
-          if (res.user) {
+          if (res && res.user) {
             setProfile(res.user);
             socket.connect();
           }
