@@ -49,4 +49,5 @@ class SocketClient {
 }
 
 // Usage in other components:
-export const socket = new SocketClient("https://rj-automated-api.onrender.com");
+// export const socket = new SocketClient("https://rj-automated-api.onrender.com");
+export const socket = new SocketClient(`http://localhost:${process.env.REACT_APP_SERVER_PORT}`);

@@ -33,9 +33,9 @@ const ContactsPage = () => {
     const addNewContact = async (updatedContacts) => {
         setContacts(updatedContacts);
         setFilteredContacts(updatedContacts);
+
         document.querySelector('#search-bar').value = '';
         document.querySelector('#search-bar').blur();
-        console.log(updatedContacts);
     }
 
     const deleteContact = async (updatedContacts) => {
@@ -43,7 +43,6 @@ const ContactsPage = () => {
         setFilteredContacts(updatedContacts);
         document.querySelector('#search-bar').value = '';
         document.querySelector('#search-bar').blur();
-        console.log(updatedContacts);
     }
 
     const notify = (message) => {
@@ -96,7 +95,7 @@ const ContactsPage = () => {
 
         socket.emit('get-users');
 
-    }, []);
+    }, [contacts]);
 
     return contacts && (unknownContacts && unknownContacts.length >= 0) ? (
         <div className="relative h-screen w-full bg-smoothWhite grid grid-rows-36"> {/* add grids if the screen size is desktop */}
