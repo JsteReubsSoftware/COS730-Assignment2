@@ -22,7 +22,7 @@ const DeleteContactModal = ({ isOpen, onClose, updateContacts}) => {
         else {
             const res2 = await API.removeContact(Cookies.get('jwt'), res.user.email);
 
-            if (res2 &&res2.success) {
+            if (res2 && res2.success) {
                 onClose('Contact Deleted');
                 updateContacts(res2.data.user.contacts);
             } else {
@@ -40,7 +40,7 @@ const DeleteContactModal = ({ isOpen, onClose, updateContacts}) => {
     
     return (        
         <div className="relative opacity-100 bg-lightPurple max-w-[1024px] w-full h-full flex flex-col justify-center border-2 border-darkPurple rounded-xl">
-            <MdOutlineClose onClick={onClose} className="absolute top-1 right-1 text-3xl text-black"/>
+            <MdOutlineClose onClick={() => onClose()} className="absolute top-1 right-1 text-3xl text-black"/>
             <div className="flex flex-col h-full m-2 justify-between">
                 <label className="self-center text-2xl font-bold">Delete Contact</label>
                 <div className="mx-2">

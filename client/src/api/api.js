@@ -1,6 +1,7 @@
 import axios from "axios"
 
-const API = axios.create({baseURL:"https://rj-automated-api.onrender.com"})
+// const API = axios.create({baseURL:"https://rj-automated-api.onrender.com"}) 
+const API = axios.create({baseURL:`http://localhost:${process.env.REACT_APP_SERVER_PORT}`})
 
 API.interceptors.request.use((req)=>{
     if(localStorage.getItem("user_info")){

@@ -8,7 +8,9 @@ const jwt = require('jsonwebtoken')
 const Cookies = require('js-cookie')
 
 const allowedOrigins = [
-    'https://rj-automated-api-app.onrender.com'
+    'https://rj-automated-api-app.onrender.com',
+    `http://localhost:${process.env.REACT_APP_CLIENT_PORT}`,
+    `http://127.0.0.1:${process.env.REACT_APP_CLIENT_PORT}`
 ]
 
 const io = require('socket.io')(chatServer, {

@@ -72,6 +72,7 @@ const ProfilePage = () => {
     const handleLogout = () => {
         Cookies.remove('jwt');
         window.location.href = '#/landing';
+        socket.disconnect();
     }
 
     const handleClose = (message) => {

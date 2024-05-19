@@ -2,7 +2,8 @@ const jwt = require("jsonwebtoken")
 const axios = require("axios")
 const Messages = require("../models/messageModel")
 
-const API = axios.create({baseURL:"https://rj-automated-api.onrender.com"})
+// const API = axios.create({baseURL:"https://rj-automated-api.onrender.com"})
+const API = axios.create({baseURL:`http://localhost:${process.env.REACT_APP_SERVER_PORT}`})
 
 const sendMessage = async (req, res) => {
     try {
