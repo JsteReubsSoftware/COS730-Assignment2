@@ -52,6 +52,41 @@ const ViewContactPage = () => {
         event.stopPropagation();
     }
 
+    const getDateLabel = (time) => {
+
+        const messageTime = new Date(time); // Create a Date object from the timestamp
+        // set current date and time to start of today at 00:00:00
+        const now = new Date();
+
+        // Calculate the difference in days between the message time and now
+        //eslint-disable-next-line
+        const daysDifference = Math.floor((now - messageTime) / (1000 * 60 * 60 * 24));
+
+        let formattedTime;
+
+        if (daysDifference === 0) {
+            // Today
+            formattedTime = `Today`;
+        } else if (daysDifference === 1) {
+            // Yesterday
+            formattedTime = `Yesterday`;
+        } else if (daysDifference < 6) {
+            // This week (Monday to Sunday)
+            const weekday = new Intl.DateTimeFormat([], { weekday: 'long' }).format(messageTime);
+            formattedTime = `${weekday}`;
+        } else {
+            // More than a week ago
+            const formattedDate = messageTime.toLocaleDateString('en-US', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+            });
+            formattedTime = formattedDate;
+        }
+        
+        return formattedTime;
+    }
+
     const formatTime = (time) => {
     //     // Test cases: Today
     //     const todayTestTime = new Date().getTime();
@@ -116,20 +151,23 @@ const ViewContactPage = () => {
 
         if (Cookies.get('jwt')) {
             const getStates = async () => {
-                const urlSearchString = window.location.search;       
-                const params = new URLSearchParams(urlSearchString);    
+                const url = window.location.href
+                //eslint-disable-next-line
+                const [hash, query] = url.split('#')[1].split('?')
+                const params = Object.fromEntries(new URLSearchParams(query));    
 
-                const res = await API.getUserById(Cookies.get('jwt'), params.get('id'));
-                
-                if (res &&res.user) {
+                const res = await API.getUserById(Cookies.get('jwt'), params.id);
+
+                if (res && res.user) {
                     setViewedUser(res.user);
 
                     const newRes = await API.getMessages(Cookies.get('jwt'), res.user._id);
-
+                    
                     if (newRes && newRes.success) {
                         // format all the messages' times
                         newRes.data.forEach(message => {
                             message.formattedTime = formatTime(message.messageTime);
+                            message.dateLabel = getDateLabel(message.messageTime);
                         });
                         setMessagesSent(newRes.data);
                         setMessagesLoaded(true);
@@ -200,13 +238,15 @@ const ViewContactPage = () => {
 
                 if (content) {
                     const formattedTime = formatTime(time);
+                    const dateLabel = getDateLabel(time);
                     setMessagesSent(messagesSent => [...messagesSent, 
                         {
                             receiverId: receiver, 
                             senderId: sender,
                             text: content, 
                             messageTime: time,
-                            formattedTime: formattedTime 
+                            formattedTime: formattedTime,
+                            dateLabel: dateLabel 
                         }
                     ]);
                 }
@@ -228,47 +268,6 @@ const ViewContactPage = () => {
             setHasScrolled(true);
         }
     }, [messagesSent, hasScrolled, viewedUser]); // Re-run effect only when messagesSent changes
-
-    const getDateLabel = (time) => {
-
-        const messageTime = new Date(time); // Create a Date object from the timestamp
-        // set current date and time to start of today at 00:00:00
-        const now = new Date();
-        now.setHours(0, 0, 0, 0);
-        now.setMilliseconds(0);
-
-        // Calculate the difference in days between the message time and now
-        const daysDifference = Math.floor((now - messageTime) / (1000 * 60 * 60 * 24));
-
-        let formattedTime;
-        //eslint-disable-next-line
-        const hours = messageTime.getHours();
-        // const minutes = messageTime.getMinutes().toString().padStart(2, '0'); // Pad minutes with leading zero if needed
-        // const amPm = hours >= 12 ? 'PM' : 'AM';
-        // const formattedHours = hours % 12 || 12; // Convert to 12-hour format (12 for midnight)
-
-        if (daysDifference === 0) {
-            // Today
-            formattedTime = `Today`;
-        } else if (daysDifference === 1) {
-            // Yesterday
-            formattedTime = `Yesterday`;
-        } else if (daysDifference <= 7) {
-            // This week (Monday to Sunday)
-            const weekday = new Intl.DateTimeFormat([], { weekday: 'long' }).format(messageTime);
-            formattedTime = `${weekday}`;
-        } else {
-            // More than a week ago
-            const formattedDate = messageTime.toLocaleDateString('en-US', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric',
-            });
-            formattedTime = formattedDate;
-        }
-
-        return formattedTime;
-    }
 
     return viewedUser && messagesLoaded ? (
         <div className="h-screen w-full grid grid-rows-36" style={{backgroundImage: `url(${require('../assets/chat-bg.jpg')})`}}>
@@ -300,20 +299,20 @@ const ViewContactPage = () => {
                     {messagesSent.map((message, index) => {
                         return (
                             <Fragment key={`${message.formattedTime + index + viewedUser._id}`}>
-                                {index === 0 && index !== messagesSent.length - 1 && getDateLabel(message.messageTime) !== getDateLabel(messagesSent[index + 1].messageTime) && (
+                                {index === 0 && (
                                     <div key={message.formattedTime + `${index}`} className="text-smoothWhite text-sm bg-lightPurple rounded-lg mx-auto p-1">
-                                        {getDateLabel(message.messageTime)}
+                                        {message.dateLabel}
+                                    </div>
+                                )}
+                                {index > 0 && message.dateLabel !== messagesSent[index - 1].dateLabel && (
+                                    <div key={message.formattedTime + `${index}`} className="text-smoothWhite text-sm bg-lightPurple rounded-lg mx-auto p-1">
+                                        {message.dateLabel}
                                     </div>
                                 )}
                                 <div key={`${message.messageTime} + ${index}`} className={`px-3 py-1 w-fit h-auto my-1 mx-2 rounded-xl ${message.senderId === viewedUser._id ? "self-start bg-slate-300" : "self-end bg-lightPurple"}`}>
                                     <div className="w-fit max-w-80 break-words">{message.text}</div>
                                     <div className={`${message.senderId === viewedUser._id ? "text-smoothGrey" : "text-whitePurple"} text-[10px] font-bold text-end`}>{message.formattedTime}</div>
                                 </div>
-                                {index > 0 && index !== messagesSent.length - 1 && getDateLabel(message.messageTime) !== getDateLabel(messagesSent[index + 1].messageTime) && (
-                                    <div key={message.formattedTime + `${index}`} className="text-smoothWhite text-sm bg-lightPurple rounded-lg mx-auto p-1">
-                                        {getDateLabel(message.messageTime)}
-                                    </div>
-                                )}
                             </ Fragment>
                         );
                     })}
