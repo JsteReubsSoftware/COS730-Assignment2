@@ -12,10 +12,12 @@ const LandingPage = () => {
     onSuccess: (credentialResponse) => {
       const loginRequest = async () => {
         const res = await API.logInGoogle(credentialResponse.access_token);
-        setProfile(res['result']);
-        const now = new Date();
-        Cookies.set('jwt', res['token'], { expires: now.setDate(now.getDate() + 1) });
-        socket.connect();
+        if (res) {
+          setProfile(res['result']);
+          const now = new Date();
+          Cookies.set('jwt', res['token'], { expires: now.setDate(now.getDate() + 1) });
+          socket.connect();
+        }
       }
       loginRequest()
     },
