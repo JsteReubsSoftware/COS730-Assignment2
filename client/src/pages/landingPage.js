@@ -16,7 +16,7 @@ const LandingPage = () => {
           setProfile(res['result']);
           const now = new Date();
           Cookies.set('jwt', res['token'], { expires: now.setDate(now.getDate() + 1) });
-          // socket.connect();
+          socket.connect();
         }
       }
       loginRequest()
